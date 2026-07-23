@@ -189,7 +189,8 @@
 
 <script>
 const SUPABASE_URL = 'https://yjornfwipngoqsriekhi.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_NfU9-hU8_PNWgLCN_uJ7nQ_dBXDIe6j';
+// ⚠️ حط هنا الـ Legacy anon key (بيبدأ بـ eyJ...) من Supabase Dashboard → Settings → API Keys → Legacy API Keys
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlqb3JuZndpcG5nb3Fzcmlla2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NjEwMTksImV4cCI6MjEwMDMzNzAxOX0.12qAZiWFJQyZKcI3vEVQqjih_hch6-9oeQuUHzzx3Js';
 
 // sensible date defaults / min
 const today = new Date().toISOString().slice(0,10);
@@ -242,6 +243,7 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
       method:'POST',
       headers:{
         'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
@@ -252,7 +254,6 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     document.getElementById('reqForm').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   }catch(err){
-    alert('الخطأ: ' + err.message);
     showErr('حصل خطأ أثناء الإرسال، حاول تاني.<br><span style="opacity:.85">Something went wrong. Please try again.</span>');
     btn.disabled = false;
     btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
