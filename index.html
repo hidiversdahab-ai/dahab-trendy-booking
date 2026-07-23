@@ -163,4 +163,100 @@
         <input id="f-adults" type="number" min="1" value="1">
       </div>
       <div class="fld">
-        <label>عدد الأطفال <span class="en">/
+        <label>عدد الأطفال <span class="en">/ Children</span></label>
+        <input id="f-children" type="number" min="0" value="0">
+      </div>
+    </div>
+
+    <div class="fld">
+      <label>ملاحظات (اختياري) <span class="en">/ Notes (optional)</span></label>
+      <textarea id="f-notes" placeholder=""></textarea>
+    </div>
+
+    <button class="submit" id="submitBtn" type="submit">إرسال الطلب<span class="en">Send Request</span></button>
+  </form>
+
+  <div class="success" id="successBox">
+    <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#5ec98f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <h2>تم استلام طلبك<span class="en">Request received</span></h2>
+    <p>هنراجع طلبك ونتواصل معاك على الواتساب قريبًا لتأكيد الحجز.
+      <span class="en">We'll review your request and reach out on WhatsApp shortly to confirm.</span>
+    </p>
+  </div>
+
+  <div class="foot">Dahab Trendy Accommodation · داهاب، جنوب سيناء</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://yjornfwipngoqsriekhi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NfU9-hU8_PNWgLCN_uJ7nQ_dBXDIe6j';
+
+// sensible date defaults / min
+const today = new Date().toISOString().slice(0,10);
+document.getElementById('f-ci').min = today;
+document.getElementById('f-ci').addEventListener('change', e=>{
+  document.getElementById('f-co').min = e.target.value;
+});
+
+function showErr(msg){
+  const box = document.getElementById('errBox');
+  box.innerHTML = msg;
+  box.style.display = 'block';
+}
+function hideErr(){
+  document.getElementById('errBox').style.display = 'none';
+}
+
+document.getElementById('reqForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  hideErr();
+
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const ci = document.getElementById('f-ci').value;
+  const co = document.getElementById('f-co').value;
+
+  if(!name || !phone || !ci || !co){
+    showErr('من فضلك املأ كل الحقول المطلوبة (*)<br><span style="opacity:.85">Please fill in all required fields (*)</span>');
+    return;
+  }
+  if(new Date(co) <= new Date(ci)){
+    showErr('تاريخ المغادرة لازم يكون بعد تاريخ الوصول<br><span style="opacity:.85">Check-out must be after check-in</span>');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = 'جاري الإرسال...<span class="en">Sending...</span>';
+
+  const payload = {
+    name, phone, ci, co,
+    room_type: document.getElementById('f-room').value,
+    adults: parseInt(document.getElementById('f-adults').value)||1,
+    children: parseInt(document.getElementById('f-children').value)||0,
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+
+  try{
+    const res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', {
+      method:'POST',
+      headers:{
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+
+    document.getElementById('reqForm').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+  }catch(err){
+    showErr('حصل خطأ أثناء الإرسال، حاول تاني.<br><span style="opacity:.85">Something went wrong. Please try again.</span>');
+    btn.disabled = false;
+    btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
+  }
+});
+</script>
+</body>
+</html>
