@@ -153,6 +153,11 @@
       <input id="f-phone" type="tel" placeholder="+20 1xx xxx xxxx" required>
     </div>
 
+    <div class="fld">
+      <label>تاريخ الميلاد (اختياري) <span class="en">/ Date of birth (optional)</span></label>
+      <input id="f-dob" type="date">
+    </div>
+
     <div class="row2">
       <div class="fld">
         <label><span class="req">*</span> تاريخ الوصول <span class="en">/ Check-in</span></label>
@@ -301,12 +306,17 @@ document.getElementById('addGuestBtn').addEventListener('click', addExtraGuestFi
 function addExtraGuestField(){
   const wrap = document.getElementById('extraGuestsWrap');
   const row = document.createElement('div');
-  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;';
   const inp = document.createElement('input');
   inp.type = 'text';
   inp.className = 'extra-guest-name';
   inp.placeholder = 'اسم الضيف / Guest name';
-  inp.style.flex = '1';
+  inp.style.flex = '1 1 60%';
+  const dobInp = document.createElement('input');
+  dobInp.type = 'date';
+  dobInp.className = 'extra-guest-dob';
+  dobInp.title = 'تاريخ الميلاد (اختياري) / Date of birth (optional)';
+  dobInp.style.flex = '1 1 130px';
   const rm = document.createElement('button');
   rm.type = 'button';
   rm.textContent = '✕';
@@ -314,15 +324,21 @@ function addExtraGuestField(){
   rm.style.cssText = 'background:rgba(224,104,94,0.12);border:1px solid rgba(224,104,94,0.4);color:var(--err);border-radius:10px;padding:0 14px;cursor:pointer;font-size:14px;';
   rm.addEventListener('click', ()=>row.remove());
   row.appendChild(inp);
+  row.appendChild(dobInp);
   row.appendChild(rm);
   wrap.appendChild(row);
   inp.focus();
 }
-function getExtraGuestNames(){
-  return Array.from(document.querySelectorAll('.extra-guest-name'))
-    .map(i=>i.value.trim())
-    .filter(Boolean);
+function getExtraGuestRows(){
+  // Keep name/dob paired by row so an empty name doesn't shift a later guest's dob out of sync
+  return Array.from(document.querySelectorAll('#extraGuestsWrap > div')).map(row=>{
+    const nameEl = row.querySelector('.extra-guest-name');
+    const dobEl = row.querySelector('.extra-guest-dob');
+    return { name: nameEl ? nameEl.value.trim() : '', dob: dobEl ? dobEl.value : '' };
+  }).filter(g=>g.name);
 }
+function getExtraGuestNames(){ return getExtraGuestRows().map(g=>g.name); }
+function getExtraGuestDobs(){ return getExtraGuestRows().map(g=>g.dob||''); }
 
 document.getElementById('reqForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -358,7 +374,9 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     adults: parseInt(document.getElementById('f-adults').value)||1,
     children: parseInt(document.getElementById('f-children').value)||0,
     notes: document.getElementById('f-notes').value.trim(),
+    dob: document.getElementById('f-dob').value || null,
     guest_names: getExtraGuestNames(),
+    guest_dobs: getExtraGuestDobs(),
   };
 
   try{
@@ -372,13 +390,27 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
       method:'POST', headers, body: JSON.stringify(payload)
     });
     if(!res.ok){
-      const bodyText = await res.text();
-      // Older Supabase tables may not have the guest_names column yet — retry safely by
-      // folding the extra names into notes instead of failing the whole submission.
-      if(payload.guest_names && payload.guest_names.length && /guest_names/i.test(bodyText)){
-        const fallback = {...payload};
+      let bodyText = await res.text();
+      // Older Supabase tables may not have the guest_names/dob/guest_dobs columns yet — retry
+      // safely by folding whichever fields are missing into notes instead of failing the submission.
+      let fallback = {...payload};
+      let changed = false;
+      if(fallback.guest_names && fallback.guest_names.length && /guest_names/i.test(bodyText)){
+        fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'الضيوف الإضافيين / Other guests: ' + fallback.guest_names.join('، ');
         delete fallback.guest_names;
-        fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'الضيوف الإضافيين / Other guests: ' + payload.guest_names.join('، ');
+        delete fallback.guest_dobs; // dobs are paired with names — no names column means no point sending dobs
+        changed = true;
+      }
+      if(fallback.guest_dobs && /guest_dobs/i.test(bodyText)){
+        delete fallback.guest_dobs;
+        changed = true;
+      }
+      if(fallback.dob && /(?<!guest_)dob/i.test(bodyText)){
+        fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'تاريخ ميلاد الضيف الرئيسي / Main guest DOB: ' + fallback.dob;
+        delete fallback.dob;
+        changed = true;
+      }
+      if(changed){
         res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', { method:'POST', headers, body: JSON.stringify(fallback) });
       }
       if(!res.ok){
