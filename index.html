@@ -209,6 +209,7 @@ function hideErr(){
 
 document.getElementById('reqForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
+  alert('الزرار اشتغل! بيتم التحقق من البيانات...');
   hideErr();
 
   const name = document.getElementById('f-name').value.trim();
@@ -237,6 +238,7 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     notes: document.getElementById('f-notes').value.trim(),
   };
 
+  alert('البيانات سليمة، جاري إرسال الطلب لـ Supabase...');
   try{
     const res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', {
       method:'POST',
@@ -249,10 +251,12 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
       body: JSON.stringify(payload)
     });
     if(!res.ok) throw new Error('HTTP ' + res.status);
+    alert('تم الإرسال بنجاح! ✅');
 
     document.getElementById('reqForm').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   }catch(err){
+    alert('الخطأ الحقيقي: ' + err.message);
     showErr('حصل خطأ أثناء الإرسال، حاول تاني.<br><span style="opacity:.85">Something went wrong. Please try again.</span>');
     btn.disabled = false;
     btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
