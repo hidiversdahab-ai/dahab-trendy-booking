@@ -363,7 +363,23 @@ document.getElementById('showCancelBtn').addEventListener('click', ()=>{
 (function(){
   const params = new URLSearchParams(window.location.search);
   const cancelId = params.get('cancel');
-  if(cancelId) openCancelScreen(cancelId);
+  if(cancelId){ openCancelScreen(cancelId); return; }
+
+  // If the guest closes the page and comes back later (no ?cancel= link at hand),
+  // let them reach cancellation using their last submitted request, saved locally.
+  const savedId = localStorage.getItem('dtaLastReqId');
+  if(savedId){
+    _currentReqId = savedId;
+    const link = document.createElement('button');
+    link.type = 'button';
+    link.className = 'cancel-link';
+    link.style.display = 'block';
+    link.style.margin = '0 auto 18px';
+    link.innerHTML = 'عندك طلب سابق؟ اضغط هنا لعرضه أو إلغاؤه<span class="en">Have a previous request? Tap to view or cancel it</span>';
+    link.addEventListener('click', ()=>openCancelScreen(savedId));
+    const wrap = document.querySelector('.wrap');
+    wrap.insertBefore(link, document.getElementById('reqForm'));
+  }
 })();
 
 async function openCancelScreen(id){
