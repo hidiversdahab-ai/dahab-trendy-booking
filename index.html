@@ -249,12 +249,15 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
       },
       body: JSON.stringify(payload)
     });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
+    if(!res.ok){
+      const bodyText = await res.text();
+      throw new Error('HTTP ' + res.status + ' — ' + bodyText);
+    }
 
     document.getElementById('reqForm').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   }catch(err){
-    showErr('حصل خطأ أثناء الإرسال، حاول تاني.<br><span style="opacity:.85">Something went wrong. Please try again.</span>');
+    showErr('حصل خطأ أثناء الإرسال (تفاصيل للتشخيص):<br><span style="opacity:.85;word-break:break-all;">' + (err.message||err) + '</span>');
     btn.disabled = false;
     btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
   }
