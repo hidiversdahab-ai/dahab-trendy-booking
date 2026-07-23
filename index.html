@@ -186,6 +186,14 @@
     </div>
 
     <div class="fld">
+      <label>أسماء باقي الأفراد (اختياري) <span class="en">/ Other guests' names (optional)</span></label>
+      <div id="extraGuestsWrap"></div>
+      <button type="button" id="addGuestBtn" style="width:100%;background:transparent;border:1px dashed var(--bdr);border-radius:11px;padding:11px;color:var(--gold2);font-weight:700;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;">
+        + إضافة اسم<span class="en" style="display:block;font-size:11px;font-weight:500;opacity:.85;margin-top:2px;">Add another guest's name</span>
+      </button>
+    </div>
+
+    <div class="fld">
       <label>ملاحظات (اختياري) <span class="en">/ Notes (optional)</span></label>
       <textarea id="f-notes" placeholder=""></textarea>
     </div>
@@ -288,6 +296,34 @@ function hideErr(){
   document.getElementById('errBox').style.display = 'none';
 }
 
+// ── Extra guest names (optional) ──
+document.getElementById('addGuestBtn').addEventListener('click', addExtraGuestField);
+function addExtraGuestField(){
+  const wrap = document.getElementById('extraGuestsWrap');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'extra-guest-name';
+  inp.placeholder = 'اسم الضيف / Guest name';
+  inp.style.flex = '1';
+  const rm = document.createElement('button');
+  rm.type = 'button';
+  rm.textContent = '✕';
+  rm.title = 'حذف';
+  rm.style.cssText = 'background:rgba(224,104,94,0.12);border:1px solid rgba(224,104,94,0.4);color:var(--err);border-radius:10px;padding:0 14px;cursor:pointer;font-size:14px;';
+  rm.addEventListener('click', ()=>row.remove());
+  row.appendChild(inp);
+  row.appendChild(rm);
+  wrap.appendChild(row);
+  inp.focus();
+}
+function getExtraGuestNames(){
+  return Array.from(document.querySelectorAll('.extra-guest-name'))
+    .map(i=>i.value.trim())
+    .filter(Boolean);
+}
+
 document.getElementById('reqForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   hideErr();
@@ -322,22 +358,33 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     adults: parseInt(document.getElementById('f-adults').value)||1,
     children: parseInt(document.getElementById('f-children').value)||0,
     notes: document.getElementById('f-notes').value.trim(),
+    guest_names: getExtraGuestNames(),
   };
 
   try{
-    const res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', {
-      method:'POST',
-      headers:{
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify(payload)
+    const headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    };
+    let res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', {
+      method:'POST', headers, body: JSON.stringify(payload)
     });
     if(!res.ok){
       const bodyText = await res.text();
-      throw new Error('HTTP ' + res.status + ' — ' + bodyText);
+      // Older Supabase tables may not have the guest_names column yet — retry safely by
+      // folding the extra names into notes instead of failing the whole submission.
+      if(payload.guest_names && payload.guest_names.length && /guest_names/i.test(bodyText)){
+        const fallback = {...payload};
+        delete fallback.guest_names;
+        fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'الضيوف الإضافيين / Other guests: ' + payload.guest_names.join('، ');
+        res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', { method:'POST', headers, body: JSON.stringify(fallback) });
+      }
+      if(!res.ok){
+        const bodyText2 = await res.text();
+        throw new Error('HTTP ' + res.status + ' — ' + bodyText2);
+      }
     }
     const inserted = await res.json();
     _currentReqId = inserted && inserted[0] ? inserted[0].id : null;
