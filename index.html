@@ -252,6 +252,7 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     document.getElementById('reqForm').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
   }catch(err){
+    alert('الخطأ: ' + err.message);
     showErr('حصل خطأ أثناء الإرسال، حاول تاني.<br><span style="opacity:.85">Something went wrong. Please try again.</span>');
     btn.disabled = false;
     btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
