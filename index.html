@@ -169,6 +169,8 @@
       </div>
     </div>
 
+    <div id="nightsInfo" style="display:none;font-size:12.5px;color:var(--gold2);font-weight:700;margin:-10px 0 16px;padding:0 2px;"></div>
+
     <div class="fld">
       <label><span class="req">*</span> اختر الغرفة <span class="en">/ Choose your room</span></label>
       <div id="roomPicker" style="font-size:12.5px;color:var(--muted);padding:10px 2px;">
@@ -233,8 +235,20 @@ document.getElementById('f-ci').min = today;
 document.getElementById('f-ci').addEventListener('change', e=>{
   document.getElementById('f-co').min = e.target.value;
   loadAvailableRooms();
+  updateNightsInfo();
 });
-document.getElementById('f-co').addEventListener('change', loadAvailableRooms);
+document.getElementById('f-co').addEventListener('change', ()=>{ loadAvailableRooms(); updateNightsInfo(); });
+
+function updateNightsInfo(){
+  const ci = document.getElementById('f-ci').value;
+  const co = document.getElementById('f-co').value;
+  const box = document.getElementById('nightsInfo');
+  if(!ci || !co){ box.style.display='none'; return; }
+  const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
+  if(nights <= 0){ box.style.display='none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = '🌙 '+nights+(nights===1?' ليلة':' ليالي')+'<span class="en" style="display:block;font-weight:500;opacity:.85;font-size:11.5px;">'+nights+(nights===1?' night':' nights')+'</span>';
+}
 
 const roomTypeAr = {
   'Single':'مفرد / Single', 'Double':'مزدوج / Double', 'Triple':'ثلاثي / Triple',
@@ -306,39 +320,48 @@ document.getElementById('addGuestBtn').addEventListener('click', addExtraGuestFi
 function addExtraGuestField(){
   const wrap = document.getElementById('extraGuestsWrap');
   const row = document.createElement('div');
-  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:11px;padding:10px;';
   const inp = document.createElement('input');
   inp.type = 'text';
   inp.className = 'extra-guest-name';
   inp.placeholder = 'اسم الضيف / Guest name';
-  inp.style.flex = '1 1 60%';
+  inp.style.flex = '1 1 100%';
+  const phoneInp = document.createElement('input');
+  phoneInp.type = 'tel';
+  phoneInp.className = 'extra-guest-phone';
+  phoneInp.placeholder = 'رقم واتساب (اختياري) / WhatsApp (optional)';
+  phoneInp.style.flex = '1 1 55%';
   const dobInp = document.createElement('input');
   dobInp.type = 'date';
   dobInp.className = 'extra-guest-dob';
   dobInp.title = 'تاريخ الميلاد (اختياري) / Date of birth (optional)';
-  dobInp.style.flex = '1 1 130px';
+  dobInp.style.flex = '1 1 120px';
   const rm = document.createElement('button');
   rm.type = 'button';
   rm.textContent = '✕';
   rm.title = 'حذف';
-  rm.style.cssText = 'background:rgba(224,104,94,0.12);border:1px solid rgba(224,104,94,0.4);color:var(--err);border-radius:10px;padding:0 14px;cursor:pointer;font-size:14px;';
+  rm.style.cssText = 'background:rgba(224,104,94,0.12);border:1px solid rgba(224,104,94,0.4);color:var(--err);border-radius:10px;padding:0 14px;cursor:pointer;font-size:14px;align-self:flex-start;';
   rm.addEventListener('click', ()=>row.remove());
   row.appendChild(inp);
+  row.appendChild(phoneInp);
   row.appendChild(dobInp);
   row.appendChild(rm);
   wrap.appendChild(row);
   inp.focus();
 }
 function getExtraGuestRows(){
-  // Keep name/dob paired by row so an empty name doesn't shift a later guest's dob out of sync
+  // Keep name/phone/dob paired by row so an empty name doesn't shift a later guest's data out of sync
   return Array.from(document.querySelectorAll('#extraGuestsWrap > div')).map(row=>{
     const nameEl = row.querySelector('.extra-guest-name');
+    const phoneEl = row.querySelector('.extra-guest-phone');
     const dobEl = row.querySelector('.extra-guest-dob');
-    return { name: nameEl ? nameEl.value.trim() : '', dob: dobEl ? dobEl.value : '' };
+    return { name: nameEl ? nameEl.value.trim() : '', phone: phoneEl ? phoneEl.value.trim() : '', dob: dobEl ? dobEl.value : '' };
   }).filter(g=>g.name);
 }
 function getExtraGuestNames(){ return getExtraGuestRows().map(g=>g.name); }
 function getExtraGuestDobs(){ return getExtraGuestRows().map(g=>g.dob||''); }
+function getExtraGuestPhones(){ return getExtraGuestRows().map(g=>g.phone||''); }
+
 
 document.getElementById('reqForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -377,6 +400,7 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     dob: document.getElementById('f-dob').value || null,
     guest_names: getExtraGuestNames(),
     guest_dobs: getExtraGuestDobs(),
+    guest_phones: getExtraGuestPhones(),
   };
 
   try{
@@ -398,11 +422,16 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
       if(fallback.guest_names && fallback.guest_names.length && /guest_names/i.test(bodyText)){
         fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'الضيوف الإضافيين / Other guests: ' + fallback.guest_names.join('، ');
         delete fallback.guest_names;
-        delete fallback.guest_dobs; // dobs are paired with names — no names column means no point sending dobs
+        delete fallback.guest_dobs; // dobs/phones are paired with names — no names column means no point sending them
+        delete fallback.guest_phones;
         changed = true;
       }
       if(fallback.guest_dobs && /guest_dobs/i.test(bodyText)){
         delete fallback.guest_dobs;
+        changed = true;
+      }
+      if(fallback.guest_phones && /guest_phones/i.test(bodyText)){
+        delete fallback.guest_phones;
         changed = true;
       }
       if(fallback.dob && /(?<!guest_)dob/i.test(bodyText)){
