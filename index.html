@@ -205,6 +205,32 @@
       <textarea id="f-notes" placeholder=""></textarea>
     </div>
 
+    <div id="policySection" style="background:rgba(201,168,76,0.07);border:1px solid var(--bdr);border-radius:14px;padding:16px 14px;margin-bottom:16px;">
+      <div style="font-weight:800;font-size:14.5px;color:var(--gold2);margin-bottom:8px;">
+        📋 سياسة الحجز والإلغاء
+        <span class="en" style="display:block;font-size:12px;font-weight:700;opacity:.85;margin-top:2px;">Booking & Cancellation Policy</span>
+      </div>
+      <div style="font-size:12.5px;color:var(--muted);line-height:1.9;max-height:150px;overflow-y:auto;background:var(--inp);border:1px solid var(--bdr);border-radius:11px;padding:12px 14px;margin-bottom:12px;">
+        <!-- ⚠️ عدّل النص ده بسياستك الحقيقية -->
+        <div>• تأكيد الحجز نهائي فقط بعد موافقة الإدارة وتحويل العربون المطلوب.</div>
+        <div>• العربون غير مسترد في حالة عدم الحضور (No-show).</div>
+        <div>• الإلغاء المجاني متاح حتى 3 أيام قبل تاريخ الوصول.</div>
+        <div>• الإلغاء خلال أقل من 3 أيام من الوصول: يُخصم قيمة ليلة واحدة.</div>
+        <div>• تسجيل الدخول (Check-in) من الساعة 2 ظهرًا، وتسجيل الخروج (Check-out) حتى 12 ظهرًا.</div>
+        <div style="margin-top:8px;font-weight:700;" class="en">
+          • Booking is confirmed only after management approval and deposit transfer.<br>
+          • Deposit is non-refundable in case of no-show.<br>
+          • Free cancellation up to 3 days before arrival.<br>
+          • Cancellation within 3 days of arrival: one night's charge applies.<br>
+          • Check-in from 2:00 PM, Check-out until 12:00 PM.
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:700;cursor:pointer;">
+        <input id="f-policyAgree" type="checkbox" style="width:18px;height:18px;accent-color:#c9a84c;flex-shrink:0;">
+        قرأت ووافقت على سياسة الحجز والإلغاء<span class="en" style="display:block;font-weight:500;opacity:.85;">I have read and agree to the booking & cancellation policy</span>
+      </label>
+    </div>
+
     <button class="submit" id="submitBtn" type="submit">إرسال الطلب<span class="en">Send Request</span></button>
   </form>
 
@@ -387,16 +413,24 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     return;
   }
 
+  const policyAgreed = document.getElementById('f-policyAgree').checked;
+  if(!policyAgreed){
+    showErr('من فضلك وافق على سياسة الحجز والإلغاء<br><span style="opacity:.85">Please agree to the booking & cancellation policy</span>');
+    return;
+  }
+
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.innerHTML = 'جاري الإرسال...<span class="en">Sending...</span>';
+
+  const notes = document.getElementById('f-notes').value.trim();
 
   const payload = {
     name, phone, ci, co,
     room, room_type: roomType,
     adults: parseInt(document.getElementById('f-adults').value)||1,
     children: parseInt(document.getElementById('f-children').value)||0,
-    notes: document.getElementById('f-notes').value.trim(),
+    notes,
     dob: document.getElementById('f-dob').value || null,
     guest_names: getExtraGuestNames(),
     guest_dobs: getExtraGuestDobs(),
