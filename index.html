@@ -94,6 +94,20 @@
 
   .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:22px;line-height:1.9;}
 
+  /* ── Room picker ── */
+  .room-card{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--inp);border:1px solid var(--bdr);border-radius:11px;
+    padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s, background .15s;
+  }
+  .room-card:active{transform:scale(0.99);}
+  .room-card.sel{border-color:var(--gold);background:rgba(201,168,76,0.12);}
+  .room-card .rc-name{font-weight:800;font-size:14.5px;color:var(--text);}
+  .room-card .rc-type{font-size:12px;color:var(--muted);margin-top:2px;}
+  .room-card .rc-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--bdr);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .room-card.sel .rc-check{border-color:var(--gold);background:var(--gold);}
+  .room-card.sel .rc-check::after{content:'✓';color:#1a1508;font-size:12px;font-weight:900;}
+
   /* ── Success state ── */
   .success{display:none;text-align:center;padding:50px 10px 20px;}
   .check{
@@ -106,6 +120,11 @@
   .success h2 .en{display:block;font-size:15px;margin-top:4px;opacity:0.9;}
   .success p{color:var(--muted);font-size:14px;line-height:1.9;max-width:320px;margin:12px auto 0;}
   .success p .en{display:block;margin-top:8px;font-size:13px;opacity:0.85;}
+  .cancel-link{
+    background:transparent;border:none;color:var(--muted);text-decoration:underline;
+    font-family:'Tajawal',sans-serif;font-size:12.5px;margin-top:18px;cursor:pointer;
+  }
+  .cancel-link .en{display:block;font-size:11px;margin-top:2px;opacity:0.85;}
 </style>
 </head>
 <body>
@@ -146,15 +165,13 @@
     </div>
 
     <div class="fld">
-      <label>نوع الغرفة <span class="en">/ Room type</span></label>
-      <select id="f-room">
-        <option value="Single">مفرد / Single</option>
-        <option value="Double">مزدوج / Double</option>
-        <option value="Triple">ثلاثي / Triple</option>
-        <option value="Suite (2 rooms)">سويت (غرفتين) / Suite (2 rooms)</option>
-        <option value="Quad">رباعي / Quad</option>
-        <option value="Dorm Bed">سرير في دورم / Dorm Bed</option>
-      </select>
+      <label><span class="req">*</span> اختر الغرفة <span class="en">/ Choose your room</span></label>
+      <div id="roomPicker" style="font-size:12.5px;color:var(--muted);padding:10px 2px;">
+        حدد تاريخ الوصول والمغادرة الأول لعرض الغرف المتاحة
+        <span class="en" style="display:block;margin-top:4px;">Pick check-in &amp; check-out dates first to see available rooms</span>
+      </div>
+      <input type="hidden" id="f-room" required>
+      <input type="hidden" id="f-room-type">
     </div>
 
     <div class="row2">
@@ -182,6 +199,11 @@
     <p>هنراجع طلبك ونتواصل معاك على الواتساب قريبًا لتأكيد الحجز.
       <span class="en">We'll review your request and reach out on WhatsApp shortly to confirm.</span>
     </p>
+    <button type="button" class="cancel-link" id="showCancelBtn">إلغاء الطلب<span class="en">Cancel this request</span></button>
+  </div>
+
+  <div class="card" id="cancelBox" style="display:none;">
+    <div id="cancelContent"></div>
   </div>
 
   <div class="foot">Dahab Trendy Accommodation · داهاب، جنوب سيناء</div>
@@ -197,7 +219,65 @@ const today = new Date().toISOString().slice(0,10);
 document.getElementById('f-ci').min = today;
 document.getElementById('f-ci').addEventListener('change', e=>{
   document.getElementById('f-co').min = e.target.value;
+  loadAvailableRooms();
 });
+document.getElementById('f-co').addEventListener('change', loadAvailableRooms);
+
+const roomTypeAr = {
+  'Single':'مفرد / Single', 'Double':'مزدوج / Double', 'Triple':'ثلاثي / Triple',
+  'Suite':'سويت / Suite', 'Dorm Bed':'سرير دورم / Dorm Bed'
+};
+
+async function loadAvailableRooms(){
+  const ci = document.getElementById('f-ci').value;
+  const co = document.getElementById('f-co').value;
+  const picker = document.getElementById('roomPicker');
+  document.getElementById('f-room').value = '';
+  document.getElementById('f-room-type').value = '';
+
+  if(!ci || !co || new Date(co) <= new Date(ci)){
+    picker.innerHTML = 'حدد تاريخ الوصول والمغادرة الأول لعرض الغرف المتاحة<span class="en" style="display:block;margin-top:4px;">Pick check-in &amp; check-out dates first to see available rooms</span>';
+    return;
+  }
+
+  picker.innerHTML = '⏳ جاري تحميل الغرف المتاحة...<span class="en" style="display:block;margin-top:4px;">Loading available rooms...</span>';
+
+  try{
+    const [catRes, bkRes] = await Promise.all([
+      fetch(SUPABASE_URL+'/rest/v1/rooms_catalog?select=*', { headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY } }),
+      fetch(SUPABASE_URL+'/rest/v1/bookings_sync?select=*&ci=lt.'+co+'&co=gt.'+ci+'&status=not.in.(Cancelled,Standby)', { headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY } })
+    ]);
+    if(!catRes.ok || !bkRes.ok) throw new Error('HTTP '+catRes.status+'/'+bkRes.status);
+    const catalog = await catRes.json();
+    const occupied = await bkRes.json();
+    const occupiedRooms = new Set(occupied.map(b=>String(b.room)));
+    const available = catalog.filter(r=>!occupiedRooms.has(String(r.room)))
+      .sort((a,b)=>String(a.room).localeCompare(String(b.room),undefined,{numeric:true}));
+
+    if(!available.length){
+      picker.innerHTML = '😔 لا توجد غرف متاحة في هذه التواريخ، جرب تواريخ تانية<span class="en" style="display:block;margin-top:4px;">No rooms available for these dates — try different dates</span>';
+      return;
+    }
+
+    picker.innerHTML = '';
+    available.forEach(r=>{
+      const card = document.createElement('div');
+      card.className = 'room-card';
+      card.innerHTML = '<div><div class="rc-name">غرفة '+r.room+' · Room '+r.room+'</div>'+
+        '<div class="rc-type">'+(roomTypeAr[r.type]||r.type)+' · '+(r.capacity||2)+' أفراد / guests</div></div>'+
+        '<div class="rc-check"></div>';
+      card.addEventListener('click', ()=>{
+        document.querySelectorAll('.room-card').forEach(c=>c.classList.remove('sel'));
+        card.classList.add('sel');
+        document.getElementById('f-room').value = r.room;
+        document.getElementById('f-room-type').value = r.type;
+      });
+      picker.appendChild(card);
+    });
+  }catch(e){
+    picker.innerHTML = '⚠️ تعذر تحميل الغرف المتاحة، حاول تاني<span class="en" style="display:block;margin-top:4px;">Could not load available rooms, please try again</span>';
+  }
+}
 
 function showErr(msg){
   const box = document.getElementById('errBox');
@@ -216,6 +296,8 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
   const phone = document.getElementById('f-phone').value.trim();
   const ci = document.getElementById('f-ci').value;
   const co = document.getElementById('f-co').value;
+  const room = document.getElementById('f-room').value;
+  const roomType = document.getElementById('f-room-type').value;
 
   if(!name || !phone || !ci || !co){
     showErr('من فضلك املأ كل الحقول المطلوبة (*)<br><span style="opacity:.85">Please fill in all required fields (*)</span>');
@@ -225,6 +307,10 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     showErr('تاريخ المغادرة لازم يكون بعد تاريخ الوصول<br><span style="opacity:.85">Check-out must be after check-in</span>');
     return;
   }
+  if(!room){
+    showErr('من فضلك اختار غرفة من القائمة<br><span style="opacity:.85">Please select a room from the list</span>');
+    return;
+  }
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
@@ -232,7 +318,7 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
 
   const payload = {
     name, phone, ci, co,
-    room_type: document.getElementById('f-room').value,
+    room, room_type: roomType,
     adults: parseInt(document.getElementById('f-adults').value)||1,
     children: parseInt(document.getElementById('f-children').value)||0,
     notes: document.getElementById('f-notes').value.trim(),
@@ -245,7 +331,7 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
         'apikey': SUPABASE_KEY,
         'Authorization': 'Bearer ' + SUPABASE_KEY,
         'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
+        'Prefer': 'return=representation'
       },
       body: JSON.stringify(payload)
     });
@@ -253,6 +339,9 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
       const bodyText = await res.text();
       throw new Error('HTTP ' + res.status + ' — ' + bodyText);
     }
+    const inserted = await res.json();
+    _currentReqId = inserted && inserted[0] ? inserted[0].id : null;
+    if(_currentReqId) localStorage.setItem('dtaLastReqId', _currentReqId);
 
     document.getElementById('reqForm').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
@@ -262,6 +351,80 @@ document.getElementById('reqForm').addEventListener('submit', async (e)=>{
     btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
   }
 });
+
+// ── CANCELLATION FLOW ──
+let _currentReqId = null;
+
+document.getElementById('showCancelBtn').addEventListener('click', ()=>{
+  if(_currentReqId) openCancelScreen(_currentReqId);
+});
+
+// Supports opening a direct cancellation link: ...?cancel=<request-id>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const cancelId = params.get('cancel');
+  if(cancelId) openCancelScreen(cancelId);
+})();
+
+async function openCancelScreen(id){
+  document.getElementById('reqForm').style.display = 'none';
+  document.getElementById('successBox').style.display = 'none';
+  const box = document.getElementById('cancelBox');
+  const content = document.getElementById('cancelContent');
+  box.style.display = 'block';
+  content.innerHTML = '⏳ جاري تحميل بيانات الطلب...<span class="en" style="display:block;margin-top:4px;">Loading your request...</span>';
+
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/booking_requests?id=eq.'+id+'&select=*', {
+      headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY }
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const rows = await res.json();
+    if(!rows.length){
+      content.innerHTML = '⚠️ الطلب ده مش موجود أو الرابط غلط<br><span style="opacity:.85">This request could not be found</span>';
+      return;
+    }
+    const r = rows[0];
+    if(r.status === 'cancelled_by_guest' || r.status === 'rejected'){
+      content.innerHTML = '✅ الطلب ده اتلغى بالفعل<br><span style="opacity:.85">This request is already cancelled</span>';
+      return;
+    }
+    content.innerHTML =
+      '<div style="margin-bottom:16px;">'+
+        '<div style="font-weight:800;font-size:15px;margin-bottom:6px;">'+r.name+'</div>'+
+        '<div style="font-size:13px;color:var(--muted);">📅 '+r.ci+' → '+r.co+'</div>'+
+        (r.room?'<div style="font-size:13px;color:var(--muted);">🛏️ غرفة '+r.room+'</div>':'')+
+      '</div>'+
+      '<div style="font-size:13px;color:var(--err);margin-bottom:16px;">متأكد إنك عايز تلغي الطلب/الحجز ده؟<span class="en" style="display:block;margin-top:4px;">Are you sure you want to cancel this request/booking?</span></div>'+
+      '<button class="submit" id="confirmCancelBtn" style="background:linear-gradient(135deg,#e0685e,#c0392b);color:#fff;">تأكيد الإلغاء<span class="en">Confirm Cancellation</span></button>';
+    document.getElementById('confirmCancelBtn').addEventListener('click', ()=>doCancel(r));
+  }catch(e){
+    content.innerHTML = '⚠️ حصل خطأ، حاول تاني<br><span style="opacity:.85">Something went wrong, please try again</span>';
+  }
+}
+
+async function doCancel(r){
+  const content = document.getElementById('cancelContent');
+  content.innerHTML = '⏳ جاري الإلغاء...<span class="en" style="display:block;margin-top:4px;">Cancelling...</span>';
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/booking_requests?id=eq.'+r.id, {
+      method:'PATCH',
+      headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+      body: JSON.stringify({status:'cancelled_by_guest'})
+    });
+    // لو الطلب كان اتحول لحجز فعلي بالفعل، نحرر الغرفة كمان
+    if(r.synced_booking_id){
+      await fetch(SUPABASE_URL+'/rest/v1/bookings_sync?id=eq.'+r.synced_booking_id, {
+        method:'PATCH',
+        headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
+        body: JSON.stringify({status:'Cancelled'})
+      });
+    }
+    content.innerHTML = '✅ تم إلغاء طلبك<br><span style="opacity:.85">Your request has been cancelled</span>';
+  }catch(e){
+    content.innerHTML = '⚠️ فشل الإلغاء، حاول تاني أو تواصل معانا واتساب<br><span style="opacity:.85">Cancellation failed, please try again or contact us on WhatsApp</span>';
+  }
+}
 </script>
 </body>
 </html>
