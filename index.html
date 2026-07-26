@@ -592,18 +592,24 @@ async function doCancel(r){
   const content = document.getElementById('cancelContent');
   content.innerHTML = '⏳ جاري الإلغاء...<span class="en" style="display:block;margin-top:4px;">Cancelling...</span>';
   try{
-    await fetch(SUPABASE_URL+'/rest/v1/booking_requests?id=eq.'+r.id, {
+    const res = await fetch(SUPABASE_URL+'/rest/v1/booking_requests?id=eq.'+r.id, {
       method:'PATCH',
       headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
       body: JSON.stringify({status:'cancelled_by_guest'})
     });
+    if(!res.ok){
+      const bodyText = await res.text().catch(()=> '');
+      throw new Error('HTTP '+res.status+(bodyText?' — '+bodyText:''));
+    }
     // لو الطلب كان اتحول لحجز فعلي بالفعل، نحرر الغرفة كمان
     if(r.synced_booking_id){
-      await fetch(SUPABASE_URL+'/rest/v1/bookings_sync?id=eq.'+r.synced_booking_id, {
+      const res2 = await fetch(SUPABASE_URL+'/rest/v1/bookings_sync?id=eq.'+r.synced_booking_id, {
         method:'PATCH',
         headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json', 'Prefer':'return=minimal' },
         body: JSON.stringify({status:'Cancelled'})
       });
+      // لا نوقف الإلغاء لو الخطوة دي فشلت (الطلب اتلغى فعلاً)، بس نسجل تحذير في الكونسول
+      if(!res2.ok) console.warn('[doCancel] failed to cancel linked booking', res2.status);
     }
     content.innerHTML = '✅ تم إلغاء طلبك<br><span style="opacity:.85">Your request has been cancelled</span>';
   }catch(e){
