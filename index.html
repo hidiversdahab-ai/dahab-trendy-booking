@@ -1,586 +1,458 @@
 <!DOCTYPE html>
+<!-- © 2026 Hany / Dahab Trendy Accommodation (DTA) — All rights reserved. Unauthorized copying, redistribution or reverse engineering is prohibited. -->
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Dahab Trendy · طلب حجز / Booking Request</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Booking Request · طلب حجز</title>
 <style>
-  :root{
-    --bg1:#0f0f1a;--bg2:#1a1a2e;--bg3:#16213e;
-    --gold:#c9a84c;--gold2:#e0c068;
-    --text:#f0e6cc;--muted:#7a8fa6;
-    --card:rgba(255,255,255,0.05);--bdr:rgba(201,168,76,0.22);--inp:rgba(255,255,255,0.07);
-    --err:#e0685e;--ok:#5ec98f;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:linear-gradient(160deg,var(--bg1),var(--bg2) 55%,var(--bg3));
-    color:var(--text);
-    font-family:'Tajawal',sans-serif;
-    min-height:100vh;
-    display:flex;justify-content:center;
-    padding:0 0 60px;
-  }
-  .wrap{width:100%;max-width:480px;padding:0 20px;}
-
-  /* ── Hero ── */
-  .hero{padding:38px 4px 28px;text-align:center;}
-  .moon{
-    width:54px;height:54px;margin:0 auto 14px;
-    border-radius:50%;
-    background:radial-gradient(circle at 35% 35%, var(--gold2), var(--gold) 60%, #8a6d2e 100%);
-    box-shadow:0 0 40px rgba(201,168,76,0.45);
-  }
-  .brand{
-    font-family:'Cormorant Garamond',serif;
-    font-size:15px;letter-spacing:6px;text-transform:uppercase;
-    color:var(--muted);margin-bottom:6px;font-style:italic;
-  }
-  h1{
-    font-size:28px;margin:0 0 12px;font-weight:900;
-    color:var(--gold2);line-height:1.35;
-  }
-  .sub{color:var(--muted);font-size:13.5px;line-height:1.9;max-width:340px;margin:0 auto;}
-  .sub .en{display:block;margin-top:6px;font-size:12.5px;opacity:0.85;}
-
-  /* wave signature divider */
-  .wave{width:100%;height:26px;margin-top:26px;}
-  .wave path{stroke:var(--gold);stroke-width:1.4;fill:none;opacity:0.55;}
-
-  /* ── Form ── */
-  .card{
-    background:var(--card);border:1px solid var(--bdr);border-radius:18px;
-    padding:22px 18px;margin-top:22px;
-  }
-  .fld{margin-bottom:16px;}
-  .fld label{
-    display:block;font-size:12.5px;color:var(--muted);margin-bottom:7px;font-weight:700;
-    letter-spacing:0.3px;
-  }
-  .fld label .req{color:var(--gold);}
-  .fld label .en{color:var(--muted);opacity:0.75;font-weight:500;}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  input,select,textarea{
-    width:100%;background:var(--inp);border:1px solid var(--bdr);
-    color:var(--text);border-radius:11px;padding:13px 14px;
-    font-family:'Tajawal',sans-serif;font-size:15px;outline:none;
-    transition:border-color .15s;
-  }
-  input:focus,select:focus,textarea:focus{border-color:var(--gold);}
-  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a8fa6' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:left 14px center;padding-left:36px;}
-  textarea{resize:vertical;min-height:70px;font-family:'Tajawal',sans-serif;}
-  input::placeholder,textarea::placeholder{color:rgba(122,143,166,0.55);}
-  input[type=date]{color-scheme:dark;}
-
-  .submit{
-    width:100%;padding:16px;margin-top:6px;border:none;border-radius:12px;
-    background:linear-gradient(135deg,var(--gold2),var(--gold));
-    color:#1a1508;font-weight:900;font-size:16px;letter-spacing:0.5px;
-    cursor:pointer;transition:transform .12s, opacity .12s;
-  }
-  .submit:active{transform:scale(0.98);}
-  .submit:disabled{opacity:0.55;cursor:default;}
-  .submit .en{display:block;font-size:12px;font-weight:700;margin-top:2px;opacity:0.85;}
-
-  .err-box{
-    background:rgba(224,104,94,0.1);border:1px solid rgba(224,104,94,0.4);
-    color:var(--err);border-radius:10px;padding:12px 14px;font-size:13px;
-    margin-bottom:16px;display:none;line-height:1.7;
-  }
-
-  .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:22px;line-height:1.9;}
-
-  /* ── Room picker ── */
-  .room-card{
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    background:var(--inp);border:1px solid var(--bdr);border-radius:11px;
-    padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s, background .15s;
-  }
-  .room-card:active{transform:scale(0.99);}
-  .room-card.sel{border-color:var(--gold);background:rgba(201,168,76,0.12);}
-  .room-card .rc-name{font-weight:800;font-size:14.5px;color:var(--text);}
-  .room-card .rc-type{font-size:12px;color:var(--muted);margin-top:2px;}
-  .room-card .rc-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--bdr);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-  .room-card.sel .rc-check{border-color:var(--gold);background:var(--gold);}
-  .room-card.sel .rc-check::after{content:'✓';color:#1a1508;font-size:12px;font-weight:900;}
-
-  /* ── Success state ── */
-  .success{display:none;text-align:center;padding:50px 10px 20px;}
-  .check{
-    width:70px;height:70px;border-radius:50%;margin:0 auto 22px;
-    background:rgba(94,201,143,0.12);border:1.5px solid var(--ok);
-    display:flex;align-items:center;justify-content:center;
-  }
-  .check svg{width:32px;height:32px;}
-  .success h2{color:var(--ok);font-size:22px;margin:0 0 4px;}
-  .success h2 .en{display:block;font-size:15px;margin-top:4px;opacity:0.9;}
-  .success p{color:var(--muted);font-size:14px;line-height:1.9;max-width:320px;margin:12px auto 0;}
-  .success p .en{display:block;margin-top:8px;font-size:13px;opacity:0.85;}
-  .cancel-link{
-    background:transparent;border:none;color:var(--muted);text-decoration:underline;
-    font-family:'Tajawal',sans-serif;font-size:12.5px;margin-top:18px;cursor:pointer;
-  }
-  .cancel-link .en{display:block;font-size:11px;margin-top:2px;opacity:0.85;}
+:root{--bg:#0f0f1a;--card:#1a1a2e;--line:rgba(201,168,76,.28);--gold:#c9a84c;--text:#f2efe6;--muted:#9a97a8;--ok:#4cda7a;--bad:#e0685e}
+@media (prefers-color-scheme: light){:root{--bg:#f6f3ea;--card:#fff;--line:rgba(150,115,30,.3);--gold:#8a6a14;--text:#1d1b16;--muted:#6c6a63}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+body{padding:max(14px,env(safe-area-inset-top)) 14px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:520px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+h1{font-size:20px;margin:0;color:var(--gold)}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 12px}
+.lang select{background:transparent;border:1px solid var(--line);color:var(--gold);border-radius:99px;padding:6px 10px;font-size:13px;max-width:130px}.lang select option{color:#000}
+.lang button{background:transparent;border:1px solid var(--line);color:var(--gold);border-radius:99px;padding:5px 12px;font-weight:700;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--gold);font-weight:700;margin:12px 0 5px}
+label:first-child{margin-top:0}
+input,select,textarea{width:100%;background:transparent;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px}
+select option{color:#111}
+textarea{min-height:72px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button.main{width:100%;background:var(--gold);color:#1a1a2e;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;margin-top:16px}
+button.main:disabled{opacity:.55}
+button.ghost{background:transparent;border:1px dashed var(--line);color:var(--gold);border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer;margin-top:8px}
+button.x{background:transparent;border:0;color:var(--bad);font-size:18px;cursor:pointer}
+.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.err{color:var(--bad);font-size:13px;margin-top:10px;min-height:1em}
+.ok{color:var(--ok)}
+.pol{font-size:12.5px;color:var(--muted);line-height:1.8}
+.pol .pl{unicode-bidi:plaintext;text-align:start;white-space:pre-line;margin:0 0 2px}
+.pol .pl.gap{margin-top:10px}
+.pol .pl.cf{color:var(--text,inherit);font-weight:700;margin-top:8px}
+.big{font-size:44px;text-align:center}
+.center{text-align:center}
+.gx{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:8px;align-items:center}
+.hp{position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+a.wa.tg{background:#229ED9}a.wa.vb{background:#7360f2}
+a.wa{display:block;text-align:center;background:#25D366;color:#fff;text-decoration:none;border-radius:12px;padding:12px;font-weight:800;margin-top:10px}
+.qb{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:12px}
+.ql{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-top:6px}
+.qt{display:flex;justify-content:space-between;gap:10px;font-size:17px;font-weight:800;color:var(--gold);margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="top"><h1 id="hname">…</h1><div class="lang"><select id="langSel" aria-label="Language"><option value="ar">العربية</option><option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option><option value="fr">Français</option><option value="it">Italiano</option><option value="tr">Türkçe</option></select></div></div>
+  <div class="sub" id="sub"></div>
+  <div id="facs" class="card" hidden><div id="facs-t" style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px"></div><div id="facs-l" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
 
-  <div class="hero">
-    <div class="moon"></div>
-    <div class="brand">داهاب · DAHAB</div>
-    <h1>Dahab Trendy Accommodation</h1>
-    <p class="sub">اطلب حجزك في دقيقة، وهنتواصل معاك لتأكيد التفاصيل والدفع.
-      <span class="en">Request your stay in a minute — we'll reach out to confirm the details.</span>
-    </p>
-    <svg class="wave" viewBox="0 0 400 26" preserveAspectRatio="none"><path d="M0 13 Q 25 2, 50 13 T 100 13 T 150 13 T 200 13 T 250 13 T 300 13 T 350 13 T 400 13"/></svg>
-  </div>
+  <div id="view-error" class="card" hidden><div class="big">⚠️</div><div class="center" id="errtxt"></div></div>
 
-  <form class="card" id="reqForm">
-    <div class="err-box" id="errBox"></div>
-
-    <div class="fld">
-      <label><span class="req">*</span> الاسم بالكامل <span class="en">/ Full name</span></label>
-      <input id="f-name" type="text" placeholder="..." required>
+  <form id="view-form" class="card" hidden novalidate autocomplete="on">
+    <label id="l-name"></label><input id="f-name" maxlength="120" autocomplete="name">
+    <label id="l-phone"></label><input id="f-phone" type="tel" inputmode="tel" maxlength="40" autocomplete="tel" placeholder="+20 …">
+    <label id="l-dob"></label><input id="f-dob" type="date">
+    <div class="row">
+      <div><label id="l-ci"></label><input id="f-ci" type="date"></div>
+      <div><label id="l-co"></label><input id="f-co" type="date"></div>
     </div>
-
-    <div class="fld">
-      <label><span class="req">*</span> رقم الواتساب <span class="en">/ WhatsApp number</span></label>
-      <input id="f-phone" type="tel" placeholder="+20 1xx xxx xxxx" required>
+    <label id="l-type"></label><select id="f-type"></select>
+    <div id="w-view" hidden><label id="l-view"></label><select id="f-view"></select></div>
+    <div class="hint" id="avail"></div>
+    <div class="qb" id="quote" hidden><label id="l-cur" style="margin-top:0"></label><select id="f-cur"></select><div id="q-lines"></div><div class="hint" id="q-note"></div></div>
+    <div class="row">
+      <div><label id="l-adults"></label><input id="f-adults" type="number" inputmode="numeric" min="1" max="20" value="1"></div>
+      <div><label id="l-children"></label><input id="f-children" type="number" inputmode="numeric" min="0" max="20" value="0"></div>
     </div>
-
-    <div class="fld">
-      <label>تاريخ الميلاد (اختياري) <span class="en">/ Date of birth (optional)</span></label>
-      <input id="f-dob" type="date">
-    </div>
-
-    <div class="row2">
-      <div class="fld">
-        <label><span class="req">*</span> تاريخ الوصول <span class="en">/ Check-in</span></label>
-        <input id="f-ci" type="date" required>
-      </div>
-      <div class="fld">
-        <label><span class="req">*</span> تاريخ المغادرة <span class="en">/ Check-out</span></label>
-        <input id="f-co" type="date" required>
-      </div>
-    </div>
-
-    <div id="nightsInfo" style="display:none;font-size:12.5px;color:var(--gold2);font-weight:700;margin:-10px 0 16px;padding:0 2px;"></div>
-
-    <div class="fld">
-      <label><span class="req">*</span> اختر الغرفة <span class="en">/ Choose your room</span></label>
-      <div id="roomPicker" style="font-size:12.5px;color:var(--muted);padding:10px 2px;">
-        حدد تاريخ الوصول والمغادرة الأول لعرض الغرف المتاحة
-        <span class="en" style="display:block;margin-top:4px;">Pick check-in &amp; check-out dates first to see available rooms</span>
-      </div>
-      <input type="hidden" id="f-room" required>
-      <input type="hidden" id="f-room-type">
-    </div>
-
-    <div class="row2">
-      <div class="fld">
-        <label>عدد البالغين <span class="en">/ Adults</span></label>
-        <input id="f-adults" type="number" min="1" value="1">
-      </div>
-      <div class="fld">
-        <label>عدد الأطفال <span class="en">/ Children</span></label>
-        <input id="f-children" type="number" min="0" value="0">
-      </div>
-    </div>
-
-    <div class="fld">
-      <label>أسماء باقي الأفراد (اختياري) <span class="en">/ Other guests' names (optional)</span></label>
-      <div id="extraGuestsWrap"></div>
-      <button type="button" id="addGuestBtn" style="width:100%;background:transparent;border:1px dashed var(--bdr);border-radius:11px;padding:11px;color:var(--gold2);font-weight:700;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer;">
-        + إضافة اسم<span class="en" style="display:block;font-size:11px;font-weight:500;opacity:.85;margin-top:2px;">Add another guest's name</span>
-      </button>
-    </div>
-
-    <div class="fld">
-      <label>ملاحظات (اختياري) <span class="en">/ Notes (optional)</span></label>
-      <textarea id="f-notes" placeholder=""></textarea>
-    </div>
-
-    <div id="policySection" style="background:rgba(201,168,76,0.07);border:1px solid var(--bdr);border-radius:14px;padding:16px 14px;margin-bottom:16px;">
-      <div style="font-weight:800;font-size:14.5px;color:var(--gold2);margin-bottom:8px;">
-        📋 سياسة الحجز والإلغاء
-        <span class="en" style="display:block;font-size:12px;font-weight:700;opacity:.85;margin-top:2px;">Booking & Cancellation Policy</span>
-      </div>
-      <div style="font-size:12.5px;color:var(--muted);line-height:1.9;max-height:150px;overflow-y:auto;background:var(--inp);border:1px solid var(--bdr);border-radius:11px;padding:12px 14px;margin-bottom:12px;">
-        <!-- ⚠️ عدّل النص ده بسياستك الحقيقية -->
-        <div>• تأكيد الحجز نهائي فقط بعد موافقة الإدارة وتحويل العربون المطلوب.</div>
-        <div>• العربون غير مسترد في حالة عدم الحضور (No-show).</div>
-        <div>• الإلغاء المجاني متاح حتى 3 أيام قبل تاريخ الوصول.</div>
-        <div>• الإلغاء خلال أقل من 3 أيام من الوصول: يُخصم قيمة ليلة واحدة.</div>
-        <div>• تسجيل الدخول (Check-in) من الساعة 2 ظهرًا، وتسجيل الخروج (Check-out) حتى 12 ظهرًا.</div>
-        <div style="margin-top:8px;font-weight:700;" class="en">
-          • Booking is confirmed only after management approval and deposit transfer.<br>
-          • Deposit is non-refundable in case of no-show.<br>
-          • Free cancellation up to 3 days before arrival.<br>
-          • Cancellation within 3 days of arrival: one night's charge applies.<br>
-          • Check-in from 2:00 PM, Check-out until 12:00 PM.
-        </div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:700;cursor:pointer;">
-        <input id="f-policyAgree" type="checkbox" style="width:18px;height:18px;accent-color:#c9a84c;flex-shrink:0;">
-        قرأت ووافقت على سياسة الحجز والإلغاء<span class="en" style="display:block;font-weight:500;opacity:.85;">I have read and agree to the booking & cancellation policy</span>
-      </label>
-    </div>
-
-    <button class="submit" id="submitBtn" type="submit">إرسال الطلب<span class="en">Send Request</span></button>
+    <div id="extra"></div>
+    <button type="button" class="ghost" id="addG"></button>
+    <label id="l-notes"></label><textarea id="f-notes" maxlength="1000"></textarea>
+    <input class="hp" id="f-web" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:12px;line-height:1.5;"><input type="checkbox" id="f-consent" style="width:auto;margin-top:3px"><span>أوافق على معالجة بياناتي لتنفيذ الحجز · I agree to my data being processed for this booking. <a href="privacy.html" target="_blank" rel="noopener">الخصوصية · Privacy</a></span></label>
+    <div class="err" id="ferr"></div>
+    <button type="submit" class="main" id="send"></button>
   </form>
 
-  <div class="success" id="successBox">
-    <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#5ec98f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-    <h2>تم استلام طلبك<span class="en">Request received</span></h2>
-    <p>هنراجع طلبك ونتواصل معاك على الواتساب قريبًا لتأكيد الحجز.
-      <span class="en">We'll review your request and reach out on WhatsApp shortly to confirm.</span>
-    </p>
-    <button type="button" class="cancel-link" id="showCancelBtn">إلغاء الطلب<span class="en">Cancel this request</span></button>
+  <div id="view-policy" class="card" hidden><label id="l-policy" style="margin-top:0"></label><div class="pol" id="pol"></div></div>
+
+  <div id="view-done" class="card center" hidden>
+    <div class="big">✅</div>
+    <h2 id="d-title" style="color:var(--gold);margin:6px 0"></h2>
+    <div id="d-text" class="pol" style="text-align:center"></div>
+    <a id="d-wa" class="wa" hidden target="_blank" rel="noopener"></a>
+    <a id="d-tg" class="wa tg" hidden target="_blank" rel="noopener"></a>
+    <a id="d-vb" class="wa vb" hidden rel="noopener"></a>
   </div>
 
-  <div class="card" id="cancelBox" style="display:none;">
-    <div id="cancelContent"></div>
+  <div id="view-cancel" class="card center" hidden>
+    <div class="big">🗓️</div>
+    <h2 id="c-title" style="color:var(--gold);margin:6px 0"></h2>
+    <div id="c-info" class="pol" style="text-align:center"></div>
+    <button class="main" id="c-btn" style="background:var(--bad);color:#fff"></button>
+    <div class="err" id="c-err"></div>
   </div>
-
-  <div class="foot">Dahab Trendy Accommodation · داهاب، جنوب سيناء</div>
 </div>
 
 <script>
-const SUPABASE_URL = 'https://yjornfwipngoqsriekhi.supabase.co';
-// ⚠️ حط هنا الـ Legacy anon key (بيبدأ بـ eyJ...) من Supabase Dashboard → Settings → API Keys → Legacy API Keys
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlqb3JuZndpcG5nb3Fzcmlla2hpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NjEwMTksImV4cCI6MjEwMDMzNzAxOX0.12qAZiWFJQyZKcI3vEVQqjih_hch6-9oeQuUHzzx3Js';
+(function(){
+'use strict';
 
-// sensible date defaults / min
-const today = new Date().toISOString().slice(0,10);
-document.getElementById('f-ci').min = today;
-document.getElementById('f-ci').addEventListener('change', e=>{
-  document.getElementById('f-co').min = e.target.value;
-  loadAvailableRooms();
-  updateNightsInfo();
-});
-document.getElementById('f-co').addEventListener('change', ()=>{ loadAvailableRooms(); updateNightsInfo(); });
-
-function updateNightsInfo(){
-  const ci = document.getElementById('f-ci').value;
-  const co = document.getElementById('f-co').value;
-  const box = document.getElementById('nightsInfo');
-  if(!ci || !co){ box.style.display='none'; return; }
-  const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
-  if(nights <= 0){ box.style.display='none'; return; }
-  box.style.display = 'block';
-  box.innerHTML = '🌙 '+nights+(nights===1?' ليلة':' ليالي')+'<span class="en" style="display:block;font-weight:500;opacity:.85;font-size:11.5px;">'+nights+(nights===1?' night':' nights')+'</span>';
+/* ───────── pure helpers (also unit-tested) ───────── */
+function decodeCfg(c){
+  try{
+    c=String(c||'').replace(/-/g,'+').replace(/_/g,'/'); while(c.length%4) c+='=';
+    var o=JSON.parse(decodeURIComponent(escape(atob(c))));
+    if(!o||typeof o.u!=='string'||typeof o.k!=='string') return null;
+    o.u=o.u.replace(/\/+$/,'');
+    if(!/^https:\/\/[a-z0-9]{8,40}\.supabase\.co$/i.test(o.u)) return null;   // الإرسال لمشاريع Supabase بس
+    if(o.k.length<20||o.k.length>600) return null;
+    var f=[]; if(Array.isArray(o.f)) o.f.slice(0,200).forEach(function(x){ if(typeof x==='string'){ if(/^[A-Za-z0-9_]{1,30}$/.test(x)) f.push(x); } else if(Array.isArray(x)&&x.length>=3) f.push([String(x[0]).slice(0,8),String(x[1]).slice(0,60),String(x[2]).slice(0,60)]); });
+    var cx=null; if(o.cx&&typeof o.cx==='object'){ var ct=String(o.cx.t||''), cv=String(o.cx.v||'').replace(/\D/g,'').slice(0,20); cx={t:(/^@[A-Za-z0-9_]{4,32}$/.test(ct)||/^\+\d{6,20}$/.test(ct))?ct:'',v:cv}; }
+    return {u:o.u,k:o.k,lc:(String(o.lc||'').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'EGP'),n:String(o.n||'').slice(0,80),w:String(o.w||'').replace(/\D/g,'').slice(0,20),f:f,cx:cx};
+  }catch(e){ return null; }
 }
+function overlaps(b,ci,co){ return b.ci < co && b.co > ci; }
+function freeRoomsByType(rooms,bookings,ci,co){
+  var out={};
+  (rooms||[]).forEach(function(r){
+    var t=r.type||'Standard';
+    if(!out[t]) out[t]={free:0,total:0,cap:0};
+    out[t].total++; out[t].cap=Math.max(out[t].cap,r.capacity||0);
+    var busy=(bookings||[]).some(function(b){ return String(b.room)===String(r.room) && b.status!=='cancelled' && b.ci&&b.co && overlaps(b,ci,co); });
+    if(!busy) out[t].free++;
+  });
+  return out;
+}
+function freeRoomsByView(rooms,bookings,ci,co,type){
+  var out={};
+  (rooms||[]).forEach(function(r){
+    if((r.type||'Standard')!==type || !r.view) return;
+    if(!out[r.view]) out[r.view]={free:0,total:0};
+    out[r.view].total++;
+    var busy=(bookings||[]).some(function(b){ return String(b.room)===String(r.room) && b.status!=='cancelled' && b.ci&&b.co && overlaps(b,ci,co); });
+    if(!busy) out[r.view].free++;
+  });
+  return out;
+}
+window.__hmsForm={decodeCfg:decodeCfg,freeRoomsByType:freeRoomsByType,freeRoomsByView:freeRoomsByView};
+if(typeof document==='undefined') return;
 
-const roomTypeAr = {
-  'Single':'مفرد / Single', 'Double':'مزدوج / Double', 'Triple':'ثلاثي / Triple',
-  'Suite':'سويت / Suite', 'Dorm Bed':'سرير دورم / Dorm Bed'
+/* ───────── state ───────── */
+var FACCAT=[["🏨","عام وأمان","General & Safety",[["wifi","📶","واي فاي مجاني","Free Wi-Fi"],["reception24","🛎️","استقبال 24 ساعة","24-hour reception"],["ac","❄️","تكييف","Air conditioning"],["heating","🔥","تدفئة","Heating"],["lift","🛗","مصعد","Elevator"],["parking","🅿️","موقف سيارات","Parking"],["laundry","🧺","خدمة غسيل","Laundry service"],["housekeeping","🧹","تنظيف يومي","Daily housekeeping"],["luggage","🧳","حفظ الأمتعة","Luggage storage"],["safe","🔐","خزنة","Safe deposit box"],["generator","🔌","مولد كهرباء","Backup generator"],["cctv","📹","كاميرات مراقبة","CCTV security"],["security24","👮","أمن 24 ساعة","24-hour security"],["firealarm","🚨","نظام إنذار حريق","Fire alarm system"],["extinguisher","🧯","طفايات حريق","Fire extinguishers"],["firstaid","⛑️","إسعافات أولية","First aid"],["doctor","🩺","طبيب عند الطلب","Doctor on call"],["nosmoke","🚭","غرف لغير المدخنين","Non-smoking rooms"],["smokingarea","🚬","منطقة تدخين","Smoking area"],["pets","🐾","يسمح بالحيوانات الأليفة","Pets allowed"],["cards","💳","الدفع بالبطاقات","Card payments"],["earlycheckin","🌅","وصول مبكر (حسب التوفر)","Early check-in (subject to availability)"],["latecheckout","⏳","مغادرة متأخرة (حسب التوفر)","Late check-out (subject to availability)"],["selfcheckin","🔑","تسجيل دخول ذاتي","Self check-in"],["keycard","🪪","كارت مفتاح","Key card access"],["tankwater","💧","خزان مياه احتياطي","Backup water tank"],["solarheater","☀️","سخان شمسي","Solar water heater"]]],["🍽️","طعام ومشروبات","Food & Drink",[["restaurant","🍽️","مطعم","Restaurant"],["breakfast","🥐","إفطار","Breakfast"],["buffet","🍱","بوفيه مفتوح","Buffet"],["cafe","☕","كافيه","Café"],["bar","🍹","بار","Bar"],["poolbar","🍸","بار الحمام","Pool bar"],["beachbar","🌴","بار الشاطئ","Beach bar"],["roomservice","🛎️","خدمة الغرف","Room service"],["rooftop","🌇","روف توب","Rooftop terrace"],["bbq","🍖","منطقة شواء","BBQ area"],["kitchen","🍳","مطبخ مشترك","Shared kitchen"],["minibar","🧊","ميني بار","Minibar"],["halal","🥩","طعام حلال","Halal food"],["vegetarian","🥗","خيارات نباتية","Vegetarian options"],["vegan","🌱","خيارات فيجان","Vegan options"],["glutenfree","🌾","خيارات خالية من الجلوتين","Gluten-free options"],["seafood","🦐","مأكولات بحرية","Seafood"],["pizza","🍕","بيتزا","Pizza"],["bakery","🥖","مخبز","Bakery"],["icecream","🍦","آيس كريم","Ice cream"],["juicebar","🧃","عصائر طازجة","Fresh juices"],["snackbar","🍔","سناك بار","Snack bar"],["sheesha","💨","شيشة","Shisha"],["kidsmenu","🍟","قائمة أطفال","Kids menu"],["privatedining","🕯️","عشاء خاص","Private dining"],["cookingclass","👨‍🍳","ورش طبخ","Cooking classes"],["packedlunch","🥪","وجبات للرحلات","Packed lunches"],["halfboard","🍲","نصف إقامة","Half board"],["fullboard","🍛","إقامة كاملة","Full board"],["allinclusive","🎟️","شامل كل شيء","All inclusive"],["freewater","💧","مياه شرب مجانية","Free drinking water"],["teacoffee","🍵","شاي وقهوة مجانًا","Free tea & coffee"],["vending","🥤","ماكينة مشروبات","Vending machine"]]],["🏊","حمامات السباحة والشاطئ","Pool & Beach",[["pool","🏊","حمام سباحة","Swimming pool"],["kidspool","🛟","حمام سباحة أطفال","Kids pool"],["heatedpool","♨️","حمام سباحة مدفأ","Heated pool"],["indoorpool","🏢","حمام سباحة داخلي","Indoor pool"],["infinitypool","♾️","حمام سباحة إنفينيتي","Infinity pool"],["beach","🏖️","شاطئ خاص","Private beach"],["beachaccess","🌊","قريب من الشاطئ","Beach access"],["sunbeds","🏝️","شيزلونج","Sun loungers"],["umbrellas","⛱️","مظلات شاطئ","Beach umbrellas"],["beachtowels","🧖","فوط حمام / شاطئ","Pool & beach towels"],["lifeguard","🛟","منقذ","Lifeguard"],["beachshower","🚿","دش شاطئ","Beach shower"],["jetty","⚓","رصيف بحري","Jetty / pier"],["housereef","🪸","شعاب مرجانية قريبة","House reef"],["sunbathing","☀️","منطقة تشمس","Sunbathing area"]]],["🏋️","رياضة ولياقة","Sports & Fitness",[["gym","🏋️","جيم","Fitness center"],["yoga","🧘","يوجا","Yoga"],["pilates","🤸","بيلاتس","Pilates"],["aerobics","💃","أيروبكس","Aerobics"],["crossfit","🏋️‍♀️","كروس فيت","CrossFit"],["trainer","🧑‍🏫","مدرب شخصي","Personal trainer"],["bikes","🚲","تأجير دراجات","Bike rental"],["running","🏃","مسار جري","Running track"],["hiking","🥾","هايكنج","Hiking"],["climbing","🧗","تسلق","Climbing"],["tennis","🎾","تنس","Tennis"],["padel","🎾","بادل","Padel"],["football","⚽","ملعب كرة قدم","Football pitch"],["basketball","🏀","كرة سلة","Basketball"],["beachvolley","🏐","كرة طائرة شاطئية","Beach volleyball"],["tabletennis","🏓","تنس طاولة","Table tennis"],["golf","⛳","جولف","Golf"],["boxing","🥊","ملاكمة / فنون قتالية","Boxing / martial arts"],["bowling","🎳","بولينج","Bowling"]]],["🤿","رياضات مائية","Water Sports",[["diving","🤿","مركز غوص","Diving center"],["divecourses","🎓","دورات غوص معتمدة","Certified diving courses"],["techdiving","🫧","غوص تقني","Technical diving"],["freediving","🫁","فري دايفينج","Freediving"],["snorkel","🥽","سنوركلنج","Snorkeling"],["equiprent","🤿","تأجير معدات غوص وسنوركلنج","Diving & snorkeling gear rental"],["kitesurf","🪁","كايت سيرف","Kitesurfing"],["kitelessons","📚","دروس كايت سيرف","Kitesurf lessons"],["windsurf","🏄","ويند سيرف","Windsurfing"],["sup","🏄‍♂️","ستاند أب بادل","Stand-up paddle"],["kayak","🛶","كاياك","Kayaking"],["boattrips","⛵","رحلات بحرية","Boat trips"],["glassboat","🚤","قارب زجاجي","Glass-bottom boat"],["jetski","🛥️","جيت سكي","Jet ski"],["parasailing","🪂","باراسيلينج","Parasailing"],["banana","🍌","بنانا بوت","Banana boat"],["fishing","🎣","صيد","Fishing"],["sailing","⛵","إبحار","Sailing"],["dolphin","🐬","رحلات دولفين","Dolphin trips"]]],["💆","سبا وعناية","Wellness & Spa",[["spa","💆","سبا","Spa"],["massage","💆‍♂️","مساج","Massage"],["thaimassage","🙏","مساج تايلاندي","Thai massage"],["aroma","🌸","علاج بالروائح","Aromatherapy"],["reflex","🦶","ريفلكسولوجي","Reflexology"],["sauna","🧖","ساونا","Sauna"],["steam","♨️","حمام بخار","Steam room"],["hammam","🛁","حمام تركي / مغربي","Hammam"],["jacuzzi","🛁","جاكوزي","Jacuzzi"],["facial","🧴","عناية بالبشرة","Facials"],["manicure","💅","مانيكير وباديكير","Manicure & pedicure"],["hairsalon","💇","كوافير","Hair salon"],["barber","💈","حلاق","Barber"],["meditation","🧘‍♀️","تأمل","Meditation"],["detox","🥬","برامج ديتوكس","Detox programs"],["henna","🌿","حنة","Henna"]]],["🎭","ترفيه وسهرات","Entertainment",[["livemusic","🎵","موسيقى حية","Live music"],["dj","🎧","دي جي","DJ"],["nightclub","🪩","نايت كلوب","Nightclub"],["karaoke","🎤","كاريوكي","Karaoke"],["bedouinnight","🏕️","ليلة بدوية","Bedouin night"],["bonfire","🔥","سهرة نار","Bonfire nights"],["movienight","🎬","عرض أفلام","Movie nights"],["animation","🎭","فريق ترفيه","Animation team"],["shows","🎪","عروض ترفيهية","Shows"],["themenights","🎉","ليالي موضوعية","Theme nights"],["quiz","❓","مسابقات","Quiz nights"],["stargazing","🔭","مراقبة النجوم","Stargazing"],["quad","🏍️","كواد / ATV","Quad biking / ATV"],["camel","🐪","ركوب جمال","Camel riding"],["horse","🐎","ركوب خيل","Horse riding"],["arcade","🕹️","ألعاب فيديو","Arcade"],["playstation","🎮","بلايستيشن","PlayStation"],["games","🎱","بلياردو وألعاب","Billiards & games"],["boardgames","🎲","ألعاب لوحية","Board games"],["chess","♟️","شطرنج","Chess"],["darts","🎯","دارتس","Darts"],["library","📚","مكتبة","Library"],["bookswap","📖","تبادل كتب","Book exchange"],["tvroom","📺","غرفة تلفزيون","TV room"],["lounge","🛋️","صالة جلوس","Lounge area"],["garden","🌴","حديقة","Garden"],["terrace","☀️","تراس","Terrace"],["photography","📸","تصوير","Photography service"]]],["👨‍👩‍👧","عائلات وأطفال","Family & Kids",[["family","👨‍👩‍👧","غرف عائلية","Family rooms"],["connecting","🚪","غرف متصلة","Connecting rooms"],["kids","🧒","نادي أطفال","Kids club"],["kidsroom","🧸","غرفة ألعاب أطفال","Kids play room"],["playground","🛝","ملعب أطفال","Playground"],["kidsactivities","🎨","أنشطة أطفال","Kids activities"],["crib","🍼","سرير أطفال","Baby cot"],["highchair","🪑","كرسي أطفال للطعام","High chair"],["babysitting","👶","جليسة أطفال","Babysitting"],["stroller","🍼","عربة أطفال","Stroller"],["babybath","🛁","بانيو أطفال","Baby bath"],["extrabed","🛏️","سرير إضافي","Extra bed"]]],["💼","أعمال ومناسبات","Business & Events",[["meeting","💼","قاعة اجتماعات","Meeting room"],["conference","🎤","قاعة مؤتمرات","Conference hall"],["coworking","💻","مساحة عمل مشتركة","Co-working space"],["businesscenter","🏢","مركز أعمال","Business center"],["printer","🖨️","طباعة وتصوير","Printing & copying"],["projector","📽️","بروجكتور","Projector"],["events","🎉","قاعة مناسبات","Event hall"],["wedding","💒","حفلات زفاف","Weddings"],["banquet","🍽️","قاعة ولائم","Banquet hall"],["outdoorevents","🎪","مناسبات في الهواء الطلق","Outdoor events"],["teambuilding","🤝","فعاليات فرق العمل","Team-building activities"]]],["🚐","مواصلات","Transport",[["airport","✈️","نقل من/إلى المطار","Airport transfer"],["sharmairport","🛬","نقل من مطار شرم الشيخ","Sharm El-Sheikh airport transfer"],["shuttle","🚌","نقل لوسط البلد","Town shuttle"],["carrental","🚗","تأجير سيارات","Car rental"],["scooter","🛵","تأجير سكوتر","Scooter rental"],["driver","🚘","سائق خاص","Private driver"],["taxi","🚕","حجز تاكسي","Taxi booking"],["busstation","🚍","توصيل لمحطة الأتوبيس","Bus station transfer"],["valet","🅿️","خدمة صف السيارات","Valet parking"],["freeparking","🆓","موقف مجاني","Free parking"],["evcharging","🔌","شحن سيارات كهربائية","EV charging"]]],["🛎️","خدمات الضيوف","Guest Services",[["concierge","🤵","كونسيرج","Concierge"],["wake","⏰","خدمة الاستيقاظ","Wake-up service"],["currency","💱","صرافة","Currency exchange"],["atm","🏧","ماكينة صراف","ATM"],["ironing","👔","كي الملابس","Ironing service"],["drycleaning","🧥","غسيل جاف","Dry cleaning"],["selfLaundry","🧺","غسالة سلف سيرفس","Self-service laundry"],["shoeshine","👞","تلميع أحذية","Shoe shine"],["turndown","🛏️","تجهيز المساء","Turndown service"],["minimarket","🛒","ميني ماركت","Mini market"],["giftshop","🎁","هدايا تذكارية","Gift shop"],["souvenirs","🧿","محل تذكارات","Souvenir shop"],["newspaper","📰","صحف","Newspapers"],["mailservice","📮","بريد وشحن","Mail & shipping"],["simcards","📱","شرائح اتصال","SIM cards"],["adapters","🔌","محولات كهرباء للإعارة","Plug adapters on loan"],["umbrella","☂️","شمسيات للإعارة","Umbrellas on loan"],["visahelp","🛂","مساعدة في التأشيرة","Visa assistance"],["ticketing","🎫","حجز تذاكر","Ticket booking"],["languages","🗣️","طاقم متعدد اللغات","Multilingual staff"],["tv","📺","تلفزيون فضائي","Satellite TV"],["hotwater","🚿","مياه ساخنة 24 ساعة","Hot water 24h"]]],["🌐","تكنولوجيا","Tech & Connectivity",[["fiber","🚀","إنترنت سريع / فايبر","Fast internet / fiber"],["wifiall","📶","واي فاي في كل المكان","Wi-Fi throughout"],["starlink","🛰️","إنترنت احتياطي (ستارلينك)","Backup internet (Starlink)"],["smarttv","📡","شاشات ذكية / ستريمنج","Smart TV / streaming"],["usb","🔋","مقابس USB وشواحن","USB sockets & chargers"],["hotelapp","📱","تطبيق الفندق","Hotel app"],["contactless","🤳","دفع بـ QR / بدون تلامس","QR / contactless payment"]]],["♿","إتاحة","Accessibility",[["accessible","♿","مناسب لذوي الإعاقة","Wheelchair accessible"],["ramp","🛤️","منحدرات","Ramps"],["accessibleroom","🚪","غرف مجهزة لذوي الإعاقة","Accessible rooms"],["groundfloor","🏠","غرف بالدور الأرضي","Ground-floor rooms"]]],["🌿","استدامة","Sustainability",[["solarpower","🔆","طاقة شمسية","Solar power"],["recycling","♻️","تدوير المخلفات","Recycling"],["noplastic","🚫","فندق قليل البلاستيك","Reduced plastic"],["refill","🚰","محطة تعبئة مياه","Water refill station"],["localproducts","🥕","منتجات محلية","Local products"]]],["🗺️","رحلات وجولات","Tours & Excursions",[["tours","🗺️","رحلات وجولات","Tours & excursions"],["safari","🏜️","رحلات سفاري","Desert safari"],["bluelagoon","🏝️","رحلة البلو لاجون","Blue Lagoon trip"],["bluehole","🕳️","رحلة البلو هول","Blue Hole trip"],["coloredcanyon","🌄","الكانيون الملون","Colored Canyon"],["stcatherine","⛰️","سانت كاترين","Saint Catherine"],["mosesmount","🌅","جبل موسى (شروق)","Mount Sinai (sunrise)"],["rasmohamed","🐠","رأس محمد","Ras Mohamed"],["bedouintrip","🏕️","زيارة قرية بدوية","Bedouin village visit"],["camping","⛺","تخييم","Camping"],["citytour","🏙️","جولة في المدينة","City tour"],["cairotrip","🚌","رحلة القاهرة","Cairo trip"],["phototour","📸","رحلات تصوير","Photo tours"]]]];
+var P=new URLSearchParams(location.search);
+var CFG=decodeCfg(P.get('c'));
+var CANCEL=P.get('cancel');
+var LANGS=['ar','en','de','ru','fr','it','tr'], LI={de:0,ru:1,fr:2,it:3,tr:4};
+var L=(function(){ try{ var s=localStorage.getItem('hms_form_lang'); if(LANGS.indexOf(s)>=0) return s; }catch(e){}
+  var n=String(navigator.language||'ar').toLowerCase().slice(0,2); return LANGS.indexOf(n)>=0?n:'en'; })();
+var rooms=[], books=[], policy=null;
+var rates={type:{},view:{}}, ENGINE=false, rpcFree=null, rpcKey='';
+var CUR=(function(){ try{ var c=localStorage.getItem('hms_form_cur'); if(c==='loc'||c==='usd'||c==='eur') return c; }catch(e){} return L==='ar'?'loc':'usd'; })();
+var $=function(id){ return document.getElementById(id); };
+
+var S={
+ ar:{sub:'املأ البيانات وهنراجع طلبك ونتواصل معاك',name:'الاسم بالكامل *',phone:'رقم التليفون / واتساب *',dob:'تاريخ الميلاد (اختياري)',ci:'الوصول *',co:'المغادرة *',type:'نوع الغرفة *',adults:'البالغين',children:'الأطفال',notes:'ملاحظات (اختياري)',send:'إرسال الطلب',sending:'جاري الإرسال…',addG:'+ إضافة ضيف آخر',gName:'اسم الضيف',gPhone:'تليفون',policy:'سياسة الحجز والإلغاء',confirm:'لا يتم تأكيد الحجز إلا بعد دفع العربون.',
+  pick:'اختر التواريخ أولاً',left:'متاح',none:'غير متاح',upto:'حتى',persons:'أفراد',
+  eName:'اكتب الاسم بالكامل',ePhone:'اكتب رقم تليفون صحيح',eDate:'اختر تاريخ الوصول والمغادرة',ePast:'تاريخ الوصول لازم يكون النهارده أو بعده',eOrder:'تاريخ المغادرة لازم يكون بعد الوصول',eMin:'الحد الأدنى للإقامة {n} ليالٍ لهذا النوع',eBlocked:'التواريخ دي مش متاحة للحجز الأونلاين، تواصل معانا على واتساب',minHint:'الحد الأدنى للإقامة {n} ليالٍ',eType:'اختر نوع الغرفة',eFull:'نوع الغرفة ده غير متاح في التواريخ دي',eCap:'عدد الأفراد أكبر من سعة نوع الغرفة المختار',eWait:'استنى دقيقة قبل إرسال طلب تاني',eSend:'تعذر إرسال الطلب. حاول تاني بعد شوية.',
+  dTitle:'تم استلام طلبك',dText:'هنراجع الطلب ونتواصل معاك على رقمك لتأكيد الحجز.\nالطلب مش حجز مؤكد لحد ما نرد عليك.',wa:'تواصل معانا على واتساب',
+  bad:'الرابط غير صالح. اطلب رابط جديد من الفندق.',loadErr:'تعذر تحميل بيانات الفندق. تأكد من الإنترنت وحاول تاني.',noRooms:'الفندق لسه مظبطش أنواع الغرف. تواصل معاهم مباشرة.',
+  cTitle:'إلغاء الحجز',cBtn:'تأكيد الإلغاء',cDone:'تم إلغاء طلبك.',cGone:'الطلب ده غير موجود أو اتلغى قبل كده.',cNights:'من',cTo:'إلى',cErr:'تعذر الإلغاء. حاول تاني أو كلّم الفندق.'},
+ en:{sub:'Fill in your details and we will review your request and contact you',name:'Full name *',phone:'Phone / WhatsApp *',dob:'Date of birth (optional)',ci:'Check-in *',co:'Check-out *',type:'Room type *',adults:'Adults',children:'Children',notes:'Notes (optional)',send:'Send request',sending:'Sending…',addG:'+ Add another guest',gName:'Guest name',gPhone:'Phone',policy:'Booking & cancellation policy',confirm:'Your booking is not confirmed until the deposit is paid.',
+  pick:'Pick your dates first',left:'available',none:'sold out',upto:'up to',persons:'guests',
+  eName:'Please enter your full name',ePhone:'Please enter a valid phone number',eDate:'Please choose check-in and check-out dates',ePast:'Check-in must be today or later',eOrder:'Check-out must be after check-in',eMin:'Minimum stay for this room type is {n} nights',eBlocked:'These dates are not available for online booking — please contact us on WhatsApp',minHint:'Minimum stay: {n} nights',eType:'Please choose a room type',eFull:'This room type is not available for those dates',eCap:'Number of guests exceeds this room type capacity',eWait:'Please wait a minute before sending another request',eSend:'Could not send your request. Please try again shortly.',
+  dTitle:'Request received',dText:'We will review your request and contact you on your number to confirm.\nThis is not a confirmed booking until we reply.',wa:'Contact us on WhatsApp',
+  bad:'This link is not valid. Please ask the hotel for a new one.',loadErr:'Could not load hotel data. Check your connection and try again.',noRooms:'The hotel has not set up room types yet. Please contact them directly.',
+  cTitle:'Cancel booking',cBtn:'Confirm cancellation',cDone:'Your request has been cancelled.',cGone:'This request does not exist or was already cancelled.',cNights:'From',cTo:'to',cErr:'Could not cancel. Try again or contact the hotel.'}
+};
+S.ar.view='الإطلالة (اختياري)'; S.ar.anyView='أي إطلالة';
+S.en.view='Preferred view (optional)'; S.en.anyView='Any view';
+S.ar.cur='العملة'; S.ar.night='ليلة'; S.ar.nights='ليالٍ'; S.ar.total='الإجمالي'; S.ar.viewAdd='إضافة الإطلالة'; S.ar.taxNote='السعر لكل غرفة في الليلة. قد تُضاف ضرائب ورسوم.';
+S.en.cur='Currency'; S.en.night='night'; S.en.nights='nights'; S.en.total='Total'; S.en.viewAdd='View supplement'; S.en.taxNote='Price per room per night. Taxes and fees may apply.';
+(function(){ var D={"sub": ["Bitte füllen Sie Ihre Daten aus, wir prüfen Ihre Anfrage und melden uns bei Ihnen", "Заполните данные — мы рассмотрим заявку и свяжемся с вами", "Remplissez vos informations, nous étudierons votre demande et vous contacterons", "Inserisci i tuoi dati: esamineremo la richiesta e ti contatteremo", "Bilgilerinizi doldurun, talebinizi inceleyip sizinle iletişime geçelim"], "name": ["Vollständiger Name *", "Полное имя *", "Nom complet *", "Nome completo *", "Ad soyad *"], "phone": ["Telefon / WhatsApp *", "Телефон / WhatsApp *", "Téléphone / WhatsApp *", "Telefono / WhatsApp *", "Telefon / WhatsApp *"], "dob": ["Geburtsdatum (optional)", "Дата рождения (необязательно)", "Date de naissance (facultatif)", "Data di nascita (facoltativo)", "Doğum tarihi (isteğe bağlı)"], "ci": ["Anreise *", "Заезд *", "Arrivée *", "Arrivo *", "Giriş *"], "co": ["Abreise *", "Выезд *", "Départ *", "Partenza *", "Çıkış *"], "type": ["Zimmertyp *", "Тип номера *", "Type de chambre *", "Tipo di camera *", "Oda tipi *"], "adults": ["Erwachsene", "Взрослые", "Adultes", "Adulti", "Yetişkin"], "children": ["Kinder", "Дети", "Enfants", "Bambini", "Çocuk"], "notes": ["Anmerkungen (optional)", "Примечания (необязательно)", "Remarques (facultatif)", "Note (facoltativo)", "Notlar (isteğe bağlı)"], "send": ["Anfrage senden", "Отправить заявку", "Envoyer la demande", "Invia richiesta", "Talebi gönder"], "sending": ["Wird gesendet…", "Отправка…", "Envoi en cours…", "Invio in corso…", "Gönderiliyor…"], "addG": ["+ Weiteren Gast hinzufügen", "+ Добавить гостя", "+ Ajouter un autre voyageur", "+ Aggiungi un altro ospite", "+ Başka misafir ekle"], "gName": ["Name des Gastes", "Имя гостя", "Nom du voyageur", "Nome ospite", "Misafir adı"], "gPhone": ["Telefon", "Телефон", "Téléphone", "Telefono", "Telefon"], "policy": ["Buchungs- und Stornierungsbedingungen", "Условия бронирования и отмены", "Conditions de réservation et d'annulation", "Condizioni di prenotazione e cancellazione", "Rezervasyon ve iptal koşulları"], "confirm": ["Ihre Buchung ist erst nach Zahlung der Anzahlung bestätigt.", "Бронирование подтверждается только после внесения предоплаты.", "Votre réservation n'est confirmée qu'après le paiement de l'acompte.", "La prenotazione è confermata solo dopo il pagamento della caparra.", "Rezervasyonunuz ön ödeme yapılana kadar onaylanmaz."], "pick": ["Wählen Sie zuerst Ihre Daten", "Сначала выберите даты", "Choisissez d'abord vos dates", "Scegli prima le date", "Önce tarihlerinizi seçin"], "left": ["verfügbar", "свободно", "disponible", "disponibile", "müsait"], "none": ["ausgebucht", "нет мест", "complet", "esaurito", "dolu"], "upto": ["bis zu", "до", "jusqu'à", "fino a", "en fazla"], "persons": ["Gäste", "гостей", "personnes", "ospiti", "misafir"], "eName": ["Bitte geben Sie Ihren vollständigen Namen ein", "Введите ваше полное имя", "Veuillez saisir votre nom complet", "Inserisci il tuo nome completo", "Lütfen adınızı soyadınızı girin"], "ePhone": ["Bitte geben Sie eine gültige Telefonnummer ein", "Введите корректный номер телефона", "Veuillez saisir un numéro de téléphone valide", "Inserisci un numero di telefono valido", "Lütfen geçerli bir telefon numarası girin"], "eDate": ["Bitte wählen Sie An- und Abreisedatum", "Выберите даты заезда и выезда", "Veuillez choisir les dates d'arrivée et de départ", "Scegli le date di arrivo e di partenza", "Lütfen giriş ve çıkış tarihlerini seçin"], "ePast": ["Die Anreise muss heute oder später sein", "Заезд должен быть сегодня или позже", "L'arrivée doit être aujourd'hui ou plus tard", "L'arrivo deve essere oggi o successivo", "Giriş bugün veya daha sonra olmalıdır"], "eOrder": ["Die Abreise muss nach der Anreise liegen", "Выезд должен быть позже заезда", "Le départ doit être après l'arrivée", "La partenza deve essere dopo l'arrivo", "Çıkış, girişten sonra olmalıdır"], "eType": ["Bitte wählen Sie einen Zimmertyp", "Выберите тип номера", "Veuillez choisir un type de chambre", "Scegli un tipo di camera", "Lütfen bir oda tipi seçin"], "eFull": ["Dieser Zimmertyp ist an diesen Terminen nicht verfügbar", "Этот тип номера недоступен на выбранные даты", "Ce type de chambre n'est pas disponible à ces dates", "Questo tipo di camera non è disponibile in queste date", "Bu oda tipi bu tarihlerde müsait değil"], "eCap": ["Die Gästezahl übersteigt die Kapazität dieses Zimmertyps", "Количество гостей превышает вместимость этого типа номера", "Le nombre de personnes dépasse la capacité de ce type de chambre", "Il numero di ospiti supera la capacità di questo tipo di camera", "Misafir sayısı bu oda tipinin kapasitesini aşıyor"], "eWait": ["Bitte warten Sie eine Minute, bevor Sie eine weitere Anfrage senden", "Подождите минуту перед отправкой следующей заявки", "Veuillez patienter une minute avant d'envoyer une autre demande", "Attendi un minuto prima di inviare un'altra richiesta", "Başka bir talep göndermeden önce lütfen bir dakika bekleyin"], "eSend": ["Ihre Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es gleich noch einmal.", "Не удалось отправить заявку. Попробуйте ещё раз чуть позже.", "Impossible d'envoyer votre demande. Veuillez réessayer dans un instant.", "Impossibile inviare la richiesta. Riprova tra poco.", "Talebiniz gönderilemedi. Lütfen kısa süre sonra tekrar deneyin."], "dTitle": ["Anfrage erhalten", "Заявка получена", "Demande reçue", "Richiesta ricevuta", "Talebiniz alındı"], "dText": ["Wir prüfen Ihre Anfrage und melden uns zur Bestätigung unter Ihrer Nummer.\nBis zu unserer Antwort ist dies keine bestätigte Buchung.", "Мы рассмотрим заявку и свяжемся с вами по указанному номеру для подтверждения.\nДо нашего ответа это не подтверждённое бронирование.", "Nous étudierons votre demande et vous contacterons au numéro indiqué pour confirmer.\nCe n'est pas une réservation confirmée tant que nous n'avons pas répondu.", "Esamineremo la richiesta e ti contatteremo al tuo numero per confermare.\nFinché non rispondiamo, non è una prenotazione confermata.", "Talebinizi inceleyip onay için numaranızdan sizinle iletişime geçeceğiz.\nBiz yanıt verene kadar bu onaylanmış bir rezervasyon değildir."], "wa": ["Kontaktieren Sie uns über WhatsApp", "Свяжитесь с нами в WhatsApp", "Contactez-nous sur WhatsApp", "Contattaci su WhatsApp", "Bize WhatsApp'tan ulaşın"], "bad": ["Dieser Link ist ungültig. Bitte fordern Sie beim Hotel einen neuen an.", "Ссылка недействительна. Запросите новую в отеле.", "Ce lien n'est pas valide. Veuillez en demander un nouveau à l'hôtel.", "Questo link non è valido. Chiedi un nuovo link all'hotel.", "Bu bağlantı geçerli değil. Lütfen otelden yeni bir bağlantı isteyin."], "loadErr": ["Hoteldaten konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.", "Не удалось загрузить данные отеля. Проверьте соединение и повторите попытку.", "Impossible de charger les données de l'hôtel. Vérifiez votre connexion et réessayez.", "Impossibile caricare i dati dell'hotel. Controlla la connessione e riprova.", "Otel bilgileri yüklenemedi. Bağlantınızı kontrol edip tekrar deneyin."], "noRooms": ["Das Hotel hat noch keine Zimmertypen eingerichtet. Bitte kontaktieren Sie es direkt.", "Отель ещё не настроил типы номеров. Свяжитесь с ним напрямую.", "L'hôtel n'a pas encore configuré les types de chambres. Veuillez le contacter directement.", "L'hotel non ha ancora impostato i tipi di camera. Contattalo direttamente.", "Otel henüz oda tiplerini ayarlamadı. Lütfen doğrudan iletişime geçin."], "cTitle": ["Buchung stornieren", "Отмена бронирования", "Annuler la réservation", "Annulla prenotazione", "Rezervasyonu iptal et"], "cBtn": ["Stornierung bestätigen", "Подтвердить отмену", "Confirmer l'annulation", "Conferma cancellazione", "İptali onayla"], "cDone": ["Ihre Anfrage wurde storniert.", "Ваша заявка отменена.", "Votre demande a été annulée.", "La tua richiesta è stata annullata.", "Talebiniz iptal edildi."], "cGone": ["Diese Anfrage existiert nicht oder wurde bereits storniert.", "Эта заявка не существует или уже отменена.", "Cette demande n'existe pas ou a déjà été annulée.", "Questa richiesta non esiste o è già stata annullata.", "Bu talep mevcut değil veya zaten iptal edilmiş."], "cNights": ["Vom", "С", "Du", "Dal", "Başlangıç:"], "cTo": ["bis", "по", "au", "al", "–"], "cErr": ["Stornierung nicht möglich. Versuchen Sie es erneut oder kontaktieren Sie das Hotel.", "Не удалось отменить. Повторите попытку или свяжитесь с отелем.", "Annulation impossible. Réessayez ou contactez l'hôtel.", "Impossibile annullare. Riprova o contatta l'hotel.", "İptal edilemedi. Tekrar deneyin veya otelle iletişime geçin."], "view": ["Bevorzugte Aussicht (optional)", "Предпочитаемый вид (необязательно)", "Vue souhaitée (facultatif)", "Vista preferita (facoltativo)", "Tercih edilen manzara (isteğe bağlı)"], "anyView": ["Beliebige Aussicht", "Любой вид", "Toutes les vues", "Qualsiasi vista", "Herhangi bir manzara"]}; ['de','ru','fr','it','tr'].forEach(function(l,i){ S[l]={}; Object.keys(D).forEach(function(k){ S[l][k]=D[k][i]; }); }); })();
+(function(){ var D={"cur": ["Währung", "Валюта", "Devise", "Valuta", "Para birimi"], "night": ["Nacht", "ночь", "nuit", "notte", "gece"], "nights": ["Nächte", "ночей", "nuits", "notti", "gece"], "total": ["Gesamt", "Итого", "Total", "Totale", "Toplam"], "viewAdd": ["Aufpreis Aussicht", "Доплата за вид", "Supplément vue", "Supplemento vista", "Manzara farkı"], "taxNote": ["Preis pro Zimmer und Nacht. Steuern und Gebühren können hinzukommen.", "Цена за номер за ночь. Могут применяться налоги и сборы.", "Prix par chambre et par nuit. Taxes et frais éventuels en sus.", "Prezzo per camera a notte. Possono essere applicate tasse e commissioni.", "Oda başına gecelik fiyat. Vergi ve ücretler eklenebilir."]}; ['de','ru','fr','it','tr'].forEach(function(l,i){ S[l]=S[l]||{}; Object.keys(D).forEach(function(k){ S[l][k]=D[k][i]; }); }); })();
+var VNT={"nile":["Nilblick","Вид на Нил","Vue sur le Nil","Vista sul Nilo","Nil manzarası"],"sea": ["Meerblick", "Вид на море", "Vue sur la mer", "Vista mare", "Deniz manzarası"], "mountain": ["Bergblick", "Вид на горы", "Vue sur la montagne", "Vista montagna", "Dağ manzarası"], "pool": ["Poolblick", "Вид на бассейн", "Vue sur la piscine", "Vista piscina", "Havuz manzarası"], "garden": ["Gartenblick", "Вид на сад", "Vue sur le jardin", "Vista giardino", "Bahçe manzarası"], "panorama": ["Panoramablick", "Панорамный вид", "Vue panoramique", "Vista panoramica", "Panoramik manzara"], "partsea": ["Teilweiser Meerblick", "Частичный вид на море", "Vue partielle sur la mer", "Vista parziale sul mare", "Kısmi deniz manzarası"], "lagoon": ["Lagunenblick", "Вид на лагуну", "Vue sur le lagon", "Vista laguna", "Lagün manzarası"], "desert": ["Wüstenblick", "Вид на пустыню", "Vue sur le désert", "Vista deserto", "Çöl manzarası"], "courtyard": ["Innenhofblick", "Вид на внутренний двор", "Vue sur la cour", "Vista cortile", "İç avlu manzarası"], "city": ["Stadtblick", "Вид на город", "Vue sur la ville", "Vista città", "Şehir manzarası"]};
+var FGT=[["Allgemein & Sicherheit", "Общее и безопасность", "Général et sécurité", "Generale e sicurezza", "Genel ve güvenlik"], ["Essen & Trinken", "Питание и напитки", "Restauration", "Cibo e bevande", "Yeme içme"], ["Pool & Strand", "Бассейн и пляж", "Piscine et plage", "Piscina e spiaggia", "Havuz ve plaj"], ["Sport & Fitness", "Спорт и фитнес", "Sport et fitness", "Sport e fitness", "Spor ve fitness"], ["Wassersport", "Водные виды спорта", "Sports nautiques", "Sport acquatici", "Su sporları"], ["Wellness & Spa", "Велнес и спа", "Bien-être et spa", "Benessere e spa", "Wellness ve spa"], ["Unterhaltung", "Развлечения", "Divertissements", "Intrattenimento", "Eğlence"], ["Familie & Kinder", "Семья и дети", "Famille et enfants", "Famiglia e bambini", "Aile ve çocuk"], ["Business & Events", "Бизнес и мероприятия", "Affaires et événements", "Business ed eventi", "İş ve etkinlikler"], ["Transport", "Транспорт", "Transport", "Trasporti", "Ulaşım"], ["Gästeservice", "Сервис для гостей", "Services aux clients", "Servizi per gli ospiti", "Misafir hizmetleri"], ["Technik & Internet", "Технологии и связь", "Technologie et connectivité", "Tecnologia e connessione", "Teknoloji ve bağlantı"], ["Barrierefreiheit", "Доступность", "Accessibilité", "Accessibilità", "Erişilebilirlik"], ["Nachhaltigkeit", "Экологичность", "Durabilité", "Sostenibilità", "Sürdürülebilirlik"], ["Ausflüge & Touren", "Экскурсии и туры", "Excursions et visites", "Escursioni e tour", "Geziler ve turlar"]], FADD=["Weitere Ausstattung", "Дополнительно", "Autres équipements", "Altri servizi", "Ek olanaklar"], FTITLE=["Ausstattung", "Удобства", "Équipements", "Servizi", "Olanaklar"];
+var FT={"wifi":["Kostenloses WLAN","Бесплатный Wi-Fi","Wi-Fi gratuit","Wi-Fi gratuito","Ücretsiz Wi-Fi"],"reception24":["24-Stunden-Rezeption","Круглосуточная стойка регистрации","Réception 24h/24","Reception 24 ore su 24","7/24 resepsiyon"],"ac":["Klimaanlage","Кондиционер","Climatisation","Aria condizionata","Klima"],"heating":["Heizung","Отопление","Chauffage","Riscaldamento","Isıtma"],"lift":["Aufzug","Лифт","Ascenseur","Ascensore","Asansör"],"parking":["Parkplatz","Парковка","Parking","Parcheggio","Otopark"],"laundry":["Wäscheservice","Прачечная","Service de blanchisserie","Servizio lavanderia","Çamaşırhane hizmeti"],"housekeeping":["Tägliche Zimmerreinigung","Ежедневная уборка","Ménage quotidien","Pulizia giornaliera","Günlük oda temizliği"],"luggage":["Gepäckaufbewahrung","Камера хранения багажа","Consigne à bagages","Deposito bagagli","Bagaj emanet"],"safe":["Safe","Сейф","Coffre-fort","Cassaforte","Kasa"],"generator":["Notstromgenerator","Резервный генератор","Groupe électrogène de secours","Generatore di emergenza","Yedek jeneratör"],"cctv":["Videoüberwachung","Видеонаблюдение","Vidéosurveillance","Videosorveglianza","Güvenlik kamerası"],"security24":["24-Stunden-Sicherheitsdienst","Круглосуточная охрана","Sécurité 24h/24","Sicurezza 24 ore su 24","7/24 güvenlik"],"firealarm":["Brandmeldeanlage","Пожарная сигнализация","Système d'alarme incendie","Sistema antincendio","Yangın alarm sistemi"],"extinguisher":["Feuerlöscher","Огнетушители","Extincteurs","Estintori","Yangın söndürücüler"],"firstaid":["Erste Hilfe","Первая помощь","Premiers secours","Pronto soccorso","İlk yardım"],"doctor":["Arzt auf Abruf","Врач по вызову","Médecin sur appel","Medico su chiamata","Çağrıyla doktor"],"nosmoke":["Nichtraucherzimmer","Номера для некурящих","Chambres non-fumeurs","Camere non fumatori","Sigara içilmeyen odalar"],"smokingarea":["Raucherbereich","Зона для курения","Espace fumeurs","Area fumatori","Sigara içme alanı"],"pets":["Haustiere erlaubt","Размещение с животными","Animaux acceptés","Animali ammessi","Evcil hayvan kabul edilir"],"cards":["Kartenzahlung","Оплата картой","Paiement par carte","Pagamento con carta","Kartla ödeme"],"earlycheckin":["Früher Check-in (nach Verfügbarkeit)","Ранний заезд (по наличию)","Arrivée anticipée (selon disponibilité)","Check-in anticipato (su disponibilità)","Erken giriş (müsaitliğe göre)"],"latecheckout":["Später Check-out (nach Verfügbarkeit)","Поздний выезд (по наличию)","Départ tardif (selon disponibilité)","Check-out posticipato (su disponibilità)","Geç çıkış (müsaitliğe göre)"],"selfcheckin":["Self-Check-in","Самостоятельная регистрация","Enregistrement autonome","Self check-in","Kendi kendine giriş"],"keycard":["Schlüsselkarte","Электронный ключ-карта","Carte-clé","Chiave elettronica","Anahtar kart"],"tankwater":["Wasserreservetank","Резервный бак с водой","Réservoir d'eau de secours","Serbatoio d'acqua di riserva","Yedek su deposu"],"solarheater":["Solar-Warmwasserbereiter","Солнечный водонагреватель","Chauffe-eau solaire","Scaldabagno solare","Güneş enerjili su ısıtıcı"],"restaurant":["Restaurant","Ресторан","Restaurant","Ristorante","Restoran"],"breakfast":["Frühstück","Завтрак","Petit-déjeuner","Colazione","Kahvaltı"],"buffet":["Buffet","Шведский стол","Buffet","Buffet","Açık büfe"],"cafe":["Café","Кафе","Café","Caffè","Kafe"],"bar":["Bar","Бар","Bar","Bar","Bar"],"poolbar":["Poolbar","Бар у бассейна","Bar de la piscine","Bar a bordo piscina","Havuz barı"],"beachbar":["Strandbar","Пляжный бар","Bar de plage","Bar sulla spiaggia","Plaj barı"],"roomservice":["Zimmerservice","Обслуживание в номерах","Service en chambre","Servizio in camera","Oda servisi"],"rooftop":["Dachterrasse","Терраса на крыше","Terrasse sur le toit","Terrazza sul tetto","Çatı terası"],"bbq":["Grillbereich","Зона барбекю","Espace barbecue","Area barbecue","Mangal alanı"],"kitchen":["Gemeinschaftsküche","Общая кухня","Cuisine partagée","Cucina condivisa","Ortak mutfak"],"minibar":["Minibar","Мини-бар","Minibar","Minibar","Minibar"],"halal":["Halal-Essen","Халяльная кухня","Cuisine halal","Cibo halal","Helal yemek"],"vegetarian":["Vegetarische Optionen","Вегетарианские блюда","Options végétariennes","Opzioni vegetariane","Vejetaryen seçenekler"],"vegan":["Vegane Optionen","Веганские блюда","Options véganes","Opzioni vegane","Vegan seçenekler"],"glutenfree":["Glutenfreie Optionen","Блюда без глютена","Options sans gluten","Opzioni senza glutine","Glütensiz seçenekler"],"seafood":["Meeresfrüchte","Морепродукты","Fruits de mer","Frutti di mare","Deniz ürünleri"],"pizza":["Pizza","Пицца","Pizza","Pizza","Pizza"],"bakery":["Bäckerei","Пекарня","Boulangerie","Panetteria","Fırın"],"icecream":["Eis","Мороженое","Glaces","Gelato","Dondurma"],"juicebar":["Frische Säfte","Свежевыжатые соки","Jus frais","Succhi freschi","Taze meyve suları"],"snackbar":["Snackbar","Снек-бар","Snack-bar","Snack bar","Snack bar"],"sheesha":["Shisha","Кальян","Chicha","Shisha","Nargile"],"kidsmenu":["Kindermenü","Детское меню","Menu enfant","Menu bambini","Çocuk menüsü"],"privatedining":["Privates Dinner","Романтический ужин","Dîner privé","Cena privata","Özel akşam yemeği"],"cookingclass":["Kochkurse","Кулинарные мастер-классы","Cours de cuisine","Corsi di cucina","Yemek kursları"],"packedlunch":["Lunchpakete","Ланч-боксы для экскурсий","Paniers-repas","Pranzo al sacco","Paket öğle yemeği"],"halfboard":["Halbpension","Полупансион","Demi-pension","Mezza pensione","Yarım pansiyon"],"fullboard":["Vollpension","Полный пансион","Pension complète","Pensione completa","Tam pansiyon"],"allinclusive":["All Inclusive","Всё включено","Tout compris","All inclusive","Her şey dahil"],"freewater":["Kostenloses Trinkwasser","Бесплатная питьевая вода","Eau potable gratuite","Acqua potabile gratuita","Ücretsiz içme suyu"],"teacoffee":["Kostenloser Tee und Kaffee","Бесплатные чай и кофе","Thé et café gratuits","Tè e caffè gratuiti","Ücretsiz çay ve kahve"],"vending":["Getränkeautomat","Автомат с напитками","Distributeur de boissons","Distributore di bevande","İçecek otomatı"],"pool":["Swimmingpool","Бассейн","Piscine","Piscina","Yüzme havuzu"],"kidspool":["Kinderbecken","Детский бассейн","Piscine pour enfants","Piscina per bambini","Çocuk havuzu"],"heatedpool":["Beheizter Pool","Подогреваемый бассейн","Piscine chauffée","Piscina riscaldata","Isıtmalı havuz"],"indoorpool":["Hallenbad","Крытый бассейн","Piscine intérieure","Piscina coperta","Kapalı havuz"],"infinitypool":["Infinity-Pool","Бассейн инфинити","Piscine à débordement","Piscina a sfioro","Sonsuzluk havuzu"],"beach":["Privatstrand","Частный пляж","Plage privée","Spiaggia privata","Özel plaj"],"beachaccess":["Strandnähe","Близость к пляжу","Accès à la plage","Accesso alla spiaggia","Plaja yakın"],"sunbeds":["Sonnenliegen","Шезлонги","Transats","Lettini","Şezlonglar"],"umbrellas":["Sonnenschirme","Пляжные зонтики","Parasols","Ombrelloni","Şemsiyeler"],"beachtowels":["Pool- und Strandtücher","Полотенца для бассейна и пляжа","Serviettes de piscine et de plage","Teli per piscina e spiaggia","Havuz ve plaj havluları"],"lifeguard":["Rettungsschwimmer","Спасатель","Maître-nageur","Bagnino","Cankurtaran"],"beachshower":["Strandduschen","Душ на пляже","Douche de plage","Doccia sulla spiaggia","Plaj duşu"],"jetty":["Steg","Пирс","Ponton","Molo","İskele"],"housereef":["Hausriff","Рифовая зона рядом","Récif de l'hôtel","Barriera corallina vicina","Yakın mercan resifi"],"sunbathing":["Sonnenbadebereich","Зона для загара","Espace bains de soleil","Area solarium","Güneşlenme alanı"],"gym":["Fitnessstudio","Тренажёрный зал","Salle de fitness","Palestra","Fitness merkezi"],"yoga":["Yoga","Йога","Yoga","Yoga","Yoga"],"pilates":["Pilates","Пилатес","Pilates","Pilates","Pilates"],"aerobics":["Aerobic","Аэробика","Aérobic","Aerobica","Aerobik"],"crossfit":["CrossFit","Кроссфит","CrossFit","CrossFit","CrossFit"],"trainer":["Personal Trainer","Персональный тренер","Coach personnel","Personal trainer","Kişisel antrenör"],"bikes":["Fahrradverleih","Прокат велосипедов","Location de vélos","Noleggio biciclette","Bisiklet kiralama"],"running":["Laufstrecke","Беговая дорожка","Parcours de course","Percorso di corsa","Koşu parkuru"],"hiking":["Wandern","Пешие походы","Randonnée","Escursionismo","Doğa yürüyüşü"],"climbing":["Klettern","Скалолазание","Escalade","Arrampicata","Tırmanış"],"tennis":["Tennis","Теннис","Tennis","Tennis","Tenis"],"padel":["Padel","Падел","Padel","Padel","Padel"],"football":["Fußballplatz","Футбольное поле","Terrain de football","Campo da calcio","Futbol sahası"],"basketball":["Basketball","Баскетбол","Basket-ball","Basket","Basketbol"],"beachvolley":["Beachvolleyball","Пляжный волейбол","Beach-volley","Beach volley","Plaj voleybolu"],"tabletennis":["Tischtennis","Настольный теннис","Tennis de table","Ping pong","Masa tenisi"],"golf":["Golf","Гольф","Golf","Golf","Golf"],"boxing":["Boxen / Kampfsport","Бокс / единоборства","Boxe / arts martiaux","Boxe / arti marziali","Boks / dövüş sanatları"],"bowling":["Bowling","Боулинг","Bowling","Bowling","Bowling"],"diving":["Tauchcenter","Дайв-центр","Centre de plongée","Centro immersioni","Dalış merkezi"],"divecourses":["Zertifizierte Tauchkurse","Сертифицированные курсы дайвинга","Cours de plongée certifiés","Corsi di immersione certificati","Sertifikalı dalış kursları"],"techdiving":["Technisches Tauchen","Технический дайвинг","Plongée technique","Immersioni tecniche","Teknik dalış"],"freediving":["Freitauchen","Фридайвинг","Apnée","Apnea","Serbest dalış"],"snorkel":["Schnorcheln","Снорклинг","Snorkeling","Snorkeling","Şnorkelle yüzme"],"equiprent":["Verleih von Tauch- und Schnorchelausrüstung","Прокат снаряжения для дайвинга и снорклинга","Location de matériel de plongée et de snorkeling","Noleggio attrezzatura per immersioni e snorkeling","Dalış ve şnorkel ekipmanı kiralama"],"kitesurf":["Kitesurfen","Кайтсёрфинг","Kitesurf","Kitesurf","Uçurtma sörfü"],"kitelessons":["Kitesurf-Unterricht","Уроки кайтсёрфинга","Cours de kitesurf","Lezioni di kitesurf","Uçurtma sörfü dersleri"],"windsurf":["Windsurfen","Виндсёрфинг","Planche à voile","Windsurf","Rüzgar sörfü"],"sup":["Stand-up-Paddling","Сапсёрфинг (SUP)","Paddle (SUP)","Stand-up paddle","Ayakta kürek (SUP)"],"kayak":["Kajak","Каякинг","Kayak","Kayak","Kano"],"boattrips":["Bootsausflüge","Морские прогулки","Excursions en bateau","Gite in barca","Tekne turları"],"glassboat":["Glasbodenboot","Лодка со стеклянным дном","Bateau à fond de verre","Barca con fondo di vetro","Camlı tekne"],"jetski":["Jetski","Гидроцикл","Jet-ski","Moto d'acqua","Jet ski"],"parasailing":["Parasailing","Парасейлинг","Parachute ascensionnel","Parasailing","Paraşüt"],"banana":["Bananenboot","Банан (водный аттракцион)","Bouée banane","Banana boat","Muz bot"],"fishing":["Angeln","Рыбалка","Pêche","Pesca","Balık tutma"],"sailing":["Segeln","Парусный спорт","Voile","Vela","Yelkencilik"],"dolphin":["Delfintouren","Экскурсии к дельфинам","Excursions avec les dauphins","Escursioni con i delfini","Yunus turları"],"spa":["Spa","Спа","Spa","Spa","Spa"],"massage":["Massage","Массаж","Massage","Massaggio","Masaj"],"thaimassage":["Thai-Massage","Тайский массаж","Massage thaïlandais","Massaggio thailandese","Tay masajı"],"aroma":["Aromatherapie","Ароматерапия","Aromathérapie","Aromaterapia","Aromaterapi"],"reflex":["Reflexzonenmassage","Рефлексотерапия стоп","Réflexologie","Riflessologia plantare","Refleksoloji"],"sauna":["Sauna","Сауна","Sauna","Sauna","Sauna"],"steam":["Dampfbad","Парная","Hammam vapeur","Bagno di vapore","Buhar odası"],"hammam":["Hamam","Хаммам","Hammam","Hammam","Hamam"],"jacuzzi":["Whirlpool","Джакузи","Jacuzzi","Jacuzzi","Jakuzi"],"facial":["Gesichtsbehandlungen","Уход за лицом","Soins du visage","Trattamenti viso","Cilt bakımı"],"manicure":["Maniküre und Pediküre","Маникюр и педикюр","Manucure et pédicure","Manicure e pedicure","Manikür ve pedikür"],"hairsalon":["Friseursalon","Парикмахерская","Salon de coiffure","Parrucchiere","Kuaför"],"barber":["Herrenfriseur","Барбершоп","Barbier","Barbiere","Berber"],"meditation":["Meditation","Медитация","Méditation","Meditazione","Meditasyon"],"detox":["Detox-Programme","Детокс-программы","Programmes détox","Programmi detox","Detoks programları"],"henna":["Henna","Хна (мехенди)","Henné","Henné","Kına"],"livemusic":["Live-Musik","Живая музыка","Musique live","Musica dal vivo","Canlı müzik"],"dj":["DJ","Диджей","DJ","DJ","DJ"],"nightclub":["Nachtclub","Ночной клуб","Boîte de nuit","Discoteca","Gece kulübü"],"karaoke":["Karaoke","Караоке","Karaoké","Karaoke","Karaoke"],"bedouinnight":["Beduinenabend","Бедуинский вечер","Soirée bédouine","Serata beduina","Bedevi gecesi"],"bonfire":["Lagerfeuerabende","Вечера у костра","Soirées autour du feu","Serate al falò","Kamp ateşi geceleri"],"movienight":["Filmabende","Киновечера","Soirées cinéma","Serate cinema","Film geceleri"],"animation":["Animationsteam","Команда аниматоров","Équipe d'animation","Team di animazione","Animasyon ekibi"],"shows":["Shows","Шоу-программы","Spectacles","Spettacoli","Gösteriler"],"themenights":["Themenabende","Тематические вечера","Soirées à thème","Serate a tema","Tema geceleri"],"quiz":["Quizabende","Викторины","Soirées quiz","Serate quiz","Bilgi yarışması geceleri"],"stargazing":["Sternenbeobachtung","Наблюдение за звёздами","Observation des étoiles","Osservazione delle stelle","Yıldız gözlemi"],"quad":["Quad-Touren / ATV","Квадроциклы / ATV","Quad / ATV","Quad / ATV","Dört tekerlekli ATV"],"camel":["Kamelreiten","Верблюжьи прогулки","Balade à dos de chameau","Giro in cammello","Deve turu"],"horse":["Reiten","Конные прогулки","Équitation","Equitazione","At binme"],"arcade":["Spielhalle","Игровые автоматы","Salle de jeux vidéo","Sala giochi","Oyun salonu"],"playstation":["PlayStation","PlayStation","PlayStation","PlayStation","PlayStation"],"games":["Billard und Spiele","Бильярд и игры","Billard et jeux","Biliardo e giochi","Bilardo ve oyunlar"],"boardgames":["Brettspiele","Настольные игры","Jeux de société","Giochi da tavolo","Masa oyunları"],"chess":["Schach","Шахматы","Échecs","Scacchi","Satranç"],"darts":["Darts","Дартс","Fléchettes","Freccette","Dart"],"library":["Bibliothek","Библиотека","Bibliothèque","Biblioteca","Kütüphane"],"bookswap":["Bücherregal zum Tauschen","Обмен книгами","Échange de livres","Scambio libri","Kitap değişimi"],"tvroom":["Fernsehraum","Телевизионная комната","Salle de télévision","Sala TV","TV odası"],"lounge":["Aufenthaltsbereich","Зона отдыха","Salon","Area lounge","Dinlenme salonu"],"garden":["Garten","Сад","Jardin","Giardino","Bahçe"],"terrace":["Terrasse","Терраса","Terrasse","Terrazza","Teras"],"photography":["Fotoservice","Фотоуслуги","Service photo","Servizio fotografico","Fotoğraf hizmeti"],"family":["Familienzimmer","Семейные номера","Chambres familiales","Camere familiari","Aile odaları"],"connecting":["Verbindungszimmer","Смежные номера","Chambres communicantes","Camere comunicanti","Bağlantılı odalar"],"kids":["Kinderclub","Детский клуб","Club enfants","Baby club","Çocuk kulübü"],"kidsroom":["Spielzimmer für Kinder","Детская игровая комната","Salle de jeux pour enfants","Sala giochi per bambini","Çocuk oyun odası"],"playground":["Spielplatz","Детская площадка","Aire de jeux","Parco giochi","Çocuk parkı"],"kidsactivities":["Kinderaktivitäten","Детские развлечения","Activités pour enfants","Attività per bambini","Çocuk etkinlikleri"],"crib":["Babybett","Детская кроватка","Lit bébé","Culla","Bebek yatağı"],"highchair":["Kinderhochstuhl","Детский стульчик для кормления","Chaise haute","Seggiolone","Mama sandalyesi"],"babysitting":["Babysitter","Услуги няни","Baby-sitting","Servizio babysitter","Bebek bakıcısı"],"stroller":["Kinderwagen","Детская коляска","Poussette","Passeggino","Bebek arabası"],"babybath":["Babybadewanne","Детская ванночка","Baignoire bébé","Vaschetta per bambini","Bebek küveti"],"extrabed":["Zustellbett","Дополнительная кровать","Lit supplémentaire","Letto aggiuntivo","Ek yatak"],"meeting":["Tagungsraum","Переговорная комната","Salle de réunion","Sala riunioni","Toplantı salonu"],"conference":["Konferenzsaal","Конференц-зал","Salle de conférence","Sala conferenze","Konferans salonu"],"coworking":["Coworking-Bereich","Коворкинг","Espace de coworking","Spazio di coworking","Ortak çalışma alanı"],"businesscenter":["Businesscenter","Бизнес-центр","Centre d'affaires","Business center","İş merkezi"],"printer":["Drucken und Kopieren","Печать и копирование","Impression et photocopie","Stampa e fotocopie","Baskı ve fotokopi"],"projector":["Beamer","Проектор","Projecteur","Proiettore","Projeksiyon"],"events":["Veranstaltungssaal","Банкетный зал для мероприятий","Salle de réception","Sala eventi","Etkinlik salonu"],"wedding":["Hochzeitsfeiern","Свадьбы","Mariages","Matrimoni","Düğünler"],"banquet":["Bankettsaal","Банкетный зал","Salle de banquet","Sala banchetti","Ziyafet salonu"],"outdoorevents":["Veranstaltungen im Freien","Мероприятия на открытом воздухе","Événements en plein air","Eventi all'aperto","Açık hava etkinlikleri"],"teambuilding":["Teambuilding-Aktivitäten","Тимбилдинг","Activités de team building","Attività di team building","Takım oluşturma etkinlikleri"],"airport":["Flughafentransfer","Трансфер из/в аэропорт","Transfert aéroport","Trasferimento aeroportuale","Havalimanı transferi"],"sharmairport":["Transfer vom Flughafen Sharm El-Sheikh","Трансфер из аэропорта Шарм-эш-Шейх","Transfert depuis l'aéroport de Charm el-Cheikh","Trasferimento dall'aeroporto di Sharm El-Sheikh","Şarm El-Şeyh havalimanı transferi"],"shuttle":["Shuttle ins Stadtzentrum","Шаттл в центр города","Navette vers le centre-ville","Navetta per il centro","Şehir merkezi servisi"],"carrental":["Autovermietung","Аренда автомобилей","Location de voitures","Noleggio auto","Araç kiralama"],"scooter":["Rollerverleih","Прокат скутеров","Location de scooters","Noleggio scooter","Scooter kiralama"],"driver":["Privatfahrer","Личный водитель","Chauffeur privé","Autista privato","Özel şoför"],"taxi":["Taxibuchung","Заказ такси","Réservation de taxi","Prenotazione taxi","Taksi çağırma"],"busstation":["Transfer zum Busbahnhof","Трансфер на автовокзал","Transfert vers la gare routière","Trasferimento alla stazione degli autobus","Otogara transfer"],"valet":["Valet-Parking","Услуга парковщика","Service voiturier","Servizio di parcheggio con voiturier","Vale hizmeti"],"freeparking":["Kostenloser Parkplatz","Бесплатная парковка","Parking gratuit","Parcheggio gratuito","Ücretsiz otopark"],"evcharging":["Ladestation für Elektrofahrzeuge","Зарядка для электромобилей","Recharge pour véhicules électriques","Ricarica per veicoli elettrici","Elektrikli araç şarj istasyonu"],"concierge":["Concierge","Консьерж","Concierge","Concierge","Konsiyerj"],"wake":["Weckservice","Услуга будильника","Service de réveil","Servizio sveglia","Uyandırma servisi"],"currency":["Geldwechsel","Обмен валюты","Bureau de change","Cambio valuta","Döviz bürosu"],"atm":["Geldautomat","Банкомат","Distributeur automatique","Bancomat","ATM"],"ironing":["Bügelservice","Услуга глажки","Service de repassage","Servizio di stireria","Ütü hizmeti"],"drycleaning":["Chemische Reinigung","Химчистка","Nettoyage à sec","Lavaggio a secco","Kuru temizleme"],"selfLaundry":["Selbstbedienungs-Waschmaschine","Прачечная самообслуживания","Laverie en libre-service","Lavanderia self-service","Self servis çamaşır makinesi"],"shoeshine":["Schuhputzservice","Чистка обуви","Cirage de chaussures","Lucidatura scarpe","Ayakkabı boyama"],"turndown":["Abenddienst","Вечерняя уборка номера","Service de couverture","Servizio di turndown","Akşam yatak hazırlığı"],"minimarket":["Minimarkt","Мини-маркет","Supérette","Minimarket","Market"],"giftshop":["Geschenkeladen","Магазин подарков","Boutique de cadeaux","Negozio di articoli da regalo","Hediyelik eşya dükkanı"],"souvenirs":["Souvenirladen","Сувенирный магазин","Boutique de souvenirs","Negozio di souvenir","Hediyelik eşya"],"newspaper":["Zeitungen","Газеты","Journaux","Giornali","Gazeteler"],"mailservice":["Post- und Versandservice","Почта и доставка","Service postal et d'expédition","Servizio postale e spedizioni","Posta ve kargo hizmeti"],"simcards":["SIM-Karten","SIM-карты","Cartes SIM","Schede SIM","SIM kartlar"],"adapters":["Steckdosenadapter zum Ausleihen","Переходники для розеток (в аренду)","Adaptateurs électriques en prêt","Adattatori di corrente in prestito","Ödünç priz adaptörü"],"umbrella":["Regenschirme zum Ausleihen","Зонты (в аренду)","Parapluies en prêt","Ombrelli in prestito","Ödünç şemsiye"],"visahelp":["Visaunterstützung","Помощь с визой","Aide pour le visa","Assistenza per il visto","Vize yardımı"],"ticketing":["Ticketbuchung","Бронирование билетов","Réservation de billets","Prenotazione biglietti","Bilet rezervasyonu"],"languages":["Mehrsprachiges Personal","Персонал, говорящий на нескольких языках","Personnel multilingue","Personale multilingue","Çok dilli personel"],"tv":["Satelliten-TV","Спутниковое ТВ","Télévision par satellite","TV satellitare","Uydu TV"],"hotwater":["Warmwasser rund um die Uhr","Горячая вода 24 часа","Eau chaude 24h/24","Acqua calda 24 ore su 24","7/24 sıcak su"],"fiber":["Schnelles Internet / Glasfaser","Быстрый интернет / оптоволокно","Internet rapide / fibre","Internet veloce / fibra","Hızlı internet / fiber"],"wifiall":["WLAN im gesamten Haus","Wi-Fi на всей территории","Wi-Fi partout","Wi-Fi in tutta la struttura","Her yerde Wi-Fi"],"starlink":["Back-up-Internet (Starlink)","Резервный интернет (Starlink)","Internet de secours (Starlink)","Internet di riserva (Starlink)","Yedek internet (Starlink)"],"smarttv":["Smart-TV / Streaming","Смарт-ТВ / стриминг","Smart TV / streaming","Smart TV / streaming","Akıllı TV / yayın"],"usb":["USB-Anschlüsse und Ladegeräte","USB-розетки и зарядки","Prises USB et chargeurs","Prese USB e caricatori","USB prizleri ve şarj cihazları"],"hotelapp":["Hotel-App","Приложение отеля","Application de l'hôtel","App dell'hotel","Otel uygulaması"],"contactless":["QR-/kontaktloses Bezahlen","Оплата по QR / бесконтактная","Paiement par QR / sans contact","Pagamento con QR / contactless","QR / temassız ödeme"],"accessible":["Rollstuhlgerecht","Доступно для инвалидных колясок","Accessible aux fauteuils roulants","Accessibile in sedia a rotelle","Tekerlekli sandalye erişimine uygun"],"ramp":["Rampen","Пандусы","Rampes d'accès","Rampe","Rampalar"],"accessibleroom":["Barrierefreie Zimmer","Номера для гостей с ограниченной подвижностью","Chambres adaptées","Camere accessibili","Engelli odaları"],"groundfloor":["Zimmer im Erdgeschoss","Номера на первом этаже","Chambres au rez-de-chaussée","Camere al piano terra","Zemin kat odaları"],"solarpower":["Solarenergie","Солнечная энергия","Énergie solaire","Energia solare","Güneş enerjisi"],"recycling":["Mülltrennung / Recycling","Переработка отходов","Recyclage","Riciclaggio","Geri dönüşüm"],"noplastic":["Plastikreduziert","Сокращение пластика","Moins de plastique","Plastica ridotta","Azaltılmış plastik"],"refill":["Wasserauffüllstation","Станция наполнения питьевой воды","Station de recharge d'eau","Stazione di ricarica acqua","Su dolum istasyonu"],"localproducts":["Regionale Produkte","Местные продукты","Produits locaux","Prodotti locali","Yerel ürünler"],"tours":["Touren und Ausflüge","Туры и экскурсии","Visites et excursions","Tour ed escursioni","Turlar ve geziler"],"safari":["Wüstensafari","Сафари по пустыне","Safari dans le désert","Safari nel deserto","Çöl safarisi"],"bluelagoon":["Ausflug zur Blue Lagoon","Поездка на Голубую лагуну","Excursion au Blue Lagoon","Gita alla Blue Lagoon","Mavi Lagün gezisi"],"bluehole":["Ausflug zum Blue Hole","Поездка на Блю-Хоул","Excursion au Blue Hole","Gita al Blue Hole","Blue Hole gezisi"],"coloredcanyon":["Farbiger Canyon","Цветной каньон","Canyon coloré","Canyon colorato","Renkli Kanyon"],"stcatherine":["Katharinenkloster","Монастырь Святой Екатерины","Sainte-Catherine","Santa Caterina","Aziz Katerina"],"mosesmount":["Mosesberg (Sonnenaufgang)","Гора Моисея (рассвет)","Mont Sinaï (lever du soleil)","Monte Sinai (alba)","Sina Dağı (gün doğumu)"],"rasmohamed":["Ras Mohammed","Рас-Мохаммед","Ras Mohammed","Ras Mohammed","Ras Muhammed"],"bedouintrip":["Besuch eines Beduinendorfs","Посещение бедуинской деревни","Visite d'un village bédouin","Visita a un villaggio beduino","Bedevi köyü ziyareti"],"camping":["Camping","Кемпинг","Camping","Campeggio","Kamp"],"citytour":["Stadtrundfahrt","Обзорная экскурсия по городу","Visite de la ville","Giro della città","Şehir turu"],"cairotrip":["Ausflug nach Kairo","Поездка в Каир","Excursion au Caire","Gita al Cairo","Kahire gezisi"],"phototour":["Fototouren","Фототуры","Visites photo","Tour fotografici","Fotoğraf turları"]};
+
+var VN={
+  sea:{ar:'إطلالة بحر',en:'Sea View'}, mountain:{ar:'إطلالة جبل',en:'Mountain View'},
+  pool:{ar:'إطلالة حمام سباحة',en:'Pool View'}, garden:{ar:'إطلالة حديقة',en:'Garden View'},
+  panorama:{ar:'إطلالة بانورامية',en:'Panorama View'}, partsea:{ar:'إطلالة جزئية على البحر',en:'Partial Sea View'},
+  lagoon:{ar:'إطلالة لاجون',en:'Lagoon View'}, desert:{ar:'إطلالة صحراء',en:'Desert View'},
+  courtyard:{ar:'إطلالة فناء داخلي',en:'Courtyard View'}, city:{ar:'إطلالة على المدينة',en:'City View'},
+  nile:{ar:'إطلالة نيل',en:'Nile View'}
+};
+function t(k){ return (S[L]&&S[L][k])||S.en[k]; }
+function vn(k){ var v=VN[k]; if(!v) return k; if(L==='ar'||L==='en') return v[L]; var a=VNT[k]; return (a&&a[LI[L]])||v.en; }
+function fLabel(id,ar,en){ if(L==='ar') return ar; if(L==='en'||!id) return en||ar; var a=FT[id]; return (a&&a[LI[L]])||en||ar; }
+function gLabel(gi,ar,en){ if(L==='ar') return ar; if(L==='en') return en; var a=FGT[gi]; return (a&&a[LI[L]])||en; }
+
+function applyLang(){
+  document.documentElement.lang=L; document.documentElement.dir=L==='ar'?'rtl':'ltr';
+  $('langSel').value=L;
+  $('hname').textContent=(CFG&&CFG.n)||'Booking';
+  $('sub').textContent=t('sub');
+  (function(){ var f=(CFG&&CFG.f)||[], box=$('facs'), l=$('facs-l'); if(!box) return; l.textContent='';
+    var ids={}, custom=[], any=false; f.forEach(function(x){ if(typeof x==='string') ids[x]=1; else custom.push(x); });
+    function addGroup(title,list){ if(!list.length) return; any=true; var h=document.createElement('div'); h.style.cssText='width:100%;font-size:12px;font-weight:700;margin-top:6px'; h.textContent=title; l.appendChild(h);
+      list.forEach(function(txt){ var s=document.createElement('span'); s.style.cssText='font-size:12px;padding:4px 9px;border:1px solid var(--line);border-radius:999px'; s.textContent=txt; l.appendChild(s); }); }
+    FACCAT.forEach(function(g,gi){ addGroup(g[0]+' '+gLabel(gi,g[1],g[2]), g[3].filter(function(i){return ids[i[0]];}).map(function(i){return i[1]+' '+fLabel(i[0],i[2],i[3]);})); });
+    addGroup('✨ '+(L==='ar'?'مرافق إضافية':L==='en'?'Additional':(FADD[LI[L]]||'Additional')), custom.map(function(x){ return x[0]+' '+(L==='ar'?x[1]:(x[2]||x[1])); }));
+    box.hidden=!any; $('facs-t').textContent=L==='ar'?'المرافق':L==='en'?'Facilities':(FTITLE[LI[L]]||'Facilities'); })();
+  [['l-name','name'],['l-phone','phone'],['l-dob','dob'],['l-ci','ci'],['l-co','co'],['l-type','type'],['l-view','view'],['l-adults','adults'],['l-children','children'],['l-notes','notes'],['l-policy','policy'],['l-cur','cur']].forEach(function(p){ $(p[0]).textContent=t(p[1]); });
+  $('send').textContent=t('send'); $('addG').textContent=t('addG');
+  $('d-title').textContent=t('dTitle'); $('d-text').textContent=t('dText'); $('c-title').textContent=t('cTitle'); $('c-btn').textContent=t('cBtn');
+  document.querySelectorAll('[data-gn]').forEach(function(e){ e.placeholder=t('gName'); });
+  document.querySelectorAll('[data-gp]').forEach(function(e){ e.placeholder=t('gPhone'); });
+  if(policy){
+    var fee=policy['fee_'+L], pre=policy['prepay_'+L];
+    var needsDeposit = !!policy.prepay_en && policy.prepay_en!=='No prepayment required';
+    var box=$('pol'); box.textContent='';
+    function addLine(txt,cls){ if(!txt) return; var d=document.createElement('div'); d.className='pl'+(cls?' '+cls:''); d.dir='auto'; d.textContent=txt; box.appendChild(d); }
+    addLine(policy.title);
+    String(policy.body||'').split('\n').forEach(function(l){ if(l.trim()) addLine(l.trim()); else if(box.lastChild && !/gap/.test(box.lastChild.className||'')) { var g=document.createElement('div'); g.style.height='8px'; box.appendChild(g); } });
+    addLine(fee,'gap'); addLine(pre);
+    if(needsDeposit) addLine(t('confirm'),'cf');
+    addLine(policy.notes,'gap');
+    $('view-policy').hidden=!box.children.length || !!CANCEL;
+  }
+  renderTypes();
+}
+$('langSel').onchange=function(){ L=LANGS.indexOf(this.value)>=0?this.value:'en'; try{ localStorage.setItem('hms_form_lang',L); }catch(e){} applyLang(); };
+
+function show(id){ ['view-error','view-form','view-done','view-cancel'].forEach(function(v){ $(v).hidden=(v!==id); }); }
+function fail(msg){ $('errtxt').textContent=msg; show('view-error'); }
+function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+/* ───────── API ───────── */
+function api(path,opts){
+  opts=opts||{}; opts.headers=Object.assign({apikey:CFG.k,Authorization:'Bearer '+CFG.k},opts.headers||{});
+  return fetch(CFG.u+path,opts);
+}
+function getJson(path){ return api(path).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+
+/* ───────── types / availability ───────── */
+var stayRules=null;
+function nightsBetween(ci,co){ return Math.round((new Date(co+'T00:00:00')-new Date(ci+'T00:00:00'))/864e5); }
+function minFor(type){ var r=stayRules; if(!r) return 1; var n=(r.byType&&r.byType[type])||r.min||1; return Math.max(1,parseInt(n,10)||1); }
+function stayCheck(type,ci,co){
+  var r=stayRules; if(!r||!ci||!co||co<=ci) return '';
+  var m=minFor(type); if(nightsBetween(ci,co)<m) return t('eMin').replace('{n}',m);
+  var bl=r.blocked||[]; for(var i=0;i<bl.length;i++){ var b=bl[i]; if(b&&b.from&&b.to&&ci<=b.to&&co>b.from) return t('eBlocked'); }
+  return '';
+}
+function showStayHint(){
+  var el=$('avail'); if(!el) return; var ty=$('f-type')?$('f-type').value:'', m=minFor(ty);
+  el.textContent=m>1?t('minHint').replace('{n}',m):'';
+}
+function renderTypes(){
+  var sel=$('f-type'); if(!sel) return;
+  var prev=sel.value, ci=$('f-ci').value, co=$('f-co').value, ok=ci&&co&&co>ci;
+  var by=freeRoomsByType(rooms,books,ok?ci:'9999-01-01',ok?co:'9999-01-02');
+  if(ok&&rpcFree&&rpcKey===ci+'|'+co){ Object.keys(by).forEach(function(k){ if(rpcFree[k]!=null) by[k].free=Math.min(by[k].free,rpcFree[k]); }); }
+  sel.innerHTML='';
+  var names=Object.keys(by).sort();
+  var ph=document.createElement('option'); ph.value=''; ph.textContent='— '+(ok?t('type').replace(' *',''):t('pick'))+' —'; sel.appendChild(ph);
+  names.forEach(function(n){
+    var o=document.createElement('option'); o.value=n;
+    var free=by[n].free;
+    o.textContent=n+(by[n].cap?' ('+t('upto')+' '+by[n].cap+' '+t('persons')+')':'')+(ok?' — '+(free>0?free+' '+t('left'):t('none')):'')+priceTag(n);
+    if(ok&&free<=0) o.disabled=true;
+    sel.appendChild(o);
+  });
+  if(prev && names.indexOf(prev)>-1) sel.value=prev;
+  showStayHint();
+  renderViews();
+  renderQuote();
+}
+function renderViews(){
+  var w=$('w-view'), sel=$('f-view'); if(!w||!sel) return;
+  var type=$('f-type').value, ci=$('f-ci').value, co=$('f-co').value, ok=ci&&co&&co>ci;
+  var by=type?freeRoomsByView(rooms,books,ok?ci:'9999-01-01',ok?co:'9999-01-02',type):{};
+  var keys=Object.keys(by).filter(function(k){ return VN[k]; });
+  var prev=sel.value; sel.innerHTML='';
+  if(!keys.length){ w.hidden=true; return; }
+  var any=document.createElement('option'); any.value=''; any.textContent='— '+t('anyView')+' —'; sel.appendChild(any);
+  keys.forEach(function(k){
+    var o=document.createElement('option'); o.value=k;
+    var free=by[k].free;
+    o.textContent=vn(k)+(ok?' — '+(free>0?free+' '+t('left'):t('none')):'');
+    if(ok&&free<=0) o.disabled=true;
+    sel.appendChild(o);
+  });
+  if(prev && keys.indexOf(prev)>-1) sel.value=prev;
+  w.hidden=false;
+}
+$('f-ci').addEventListener('change',function(){ var ci=$('f-ci').value; if(ci){ var d=new Date(ci+'T00:00:00'); d.setDate(d.getDate()+1); var min=iso(d); $('f-co').min=min; if(!$('f-co').value||$('f-co').value<=ci) $('f-co').value=min; } renderTypes(); });
+$('f-co').addEventListener('change',renderTypes);
+$('f-type').addEventListener('change',function(){ renderViews(); showStayHint(); });
+
+/* ───────── prices, quote, holds ───────── */
+function curCode(c){ return c==='loc'?((CFG&&CFG.lc)||'EGP'):String(c).toUpperCase(); }
+function money(n,c){ var v=Math.round((+n||0)*100)/100, f; try{ f=new Intl.NumberFormat(L==='ar'?'ar-EG-u-nu-latn':L,{maximumFractionDigits:v%1?2:0}).format(v); }catch(e){ f=String(v); } return f+' '+curCode(c||CUR); }
+function curOptions(){ var out=[]; ['loc','usd','eur'].forEach(function(c){ var any=Object.keys(rates.type).some(function(k){ return (+rates.type[k][c]||0)>0; }); if(any) out.push(c); }); return out; }
+function priceTag(type){ var r=rates.type[type]; if(!ENGINE||!r) return ''; var p=+r[CUR]||0; return p>0?' · '+money(p)+'/'+t('night'):''; }
+function quoteNow(){
+  var ci=$('f-ci').value, co=$('f-co').value, type=$('f-type').value, view=$('f-view')?$('f-view').value:'';
+  if(!ENGINE||!type||!ci||!co||co<=ci) return null;
+  var n=nightsBetween(ci,co), r=rates.type[type]; if(!r||!(n>0)) return null;
+  var per=+r[CUR]||0; if(per<=0) return null;
+  var sv=(view&&rates.view[view])?(+rates.view[view][CUR]||0):0;
+  return {cur:CUR,code:curCode(CUR),per:per,sv:sv,n:n,total:(per+sv)*n};
+}
+function renderQuote(){
+  var box=$('quote'); if(!box) return;
+  var opts=curOptions();
+  if(!ENGINE||!opts.length){ box.hidden=true; return; }
+  if(opts.indexOf(CUR)<0) CUR=opts[0];
+  var sel=$('f-cur');
+  if(sel.getAttribute('data-k')!==opts.join(',')+'|'+L){
+    sel.innerHTML=''; opts.forEach(function(c){ var o=document.createElement('option'); o.value=c; o.textContent=curCode(c); sel.appendChild(o); });
+    sel.setAttribute('data-k',opts.join(',')+'|'+L);
+  }
+  sel.value=CUR;
+  var q=quoteNow(), box2=$('q-lines'); box2.textContent='';
+  function line(a,b,cls){ var d=document.createElement('div'); d.className=cls||'ql'; var x=document.createElement('span'), y=document.createElement('span'); x.textContent=a; y.textContent=b; d.appendChild(x); d.appendChild(y); box2.appendChild(d); }
+  if(q){
+    line(money(q.per)+' × '+q.n+' '+(q.n===1?t('night'):t('nights')), money(q.per*q.n));
+    if(q.sv>0) line(t('viewAdd')+' ('+money(q.sv)+' × '+q.n+')', money(q.sv*q.n));
+    line(t('total'), money(q.total), 'qt');
+    $('q-note').textContent=t('taxNote');
+  } else $('q-note').textContent='';
+  box.hidden=false;
+}
+function fetchAvail(){
+  if(!ENGINE) return;
+  var ci=$('f-ci').value, co=$('f-co').value; if(!ci||!co||co<=ci){ rpcFree=null; return; }
+  var key=ci+'|'+co;
+  api('/rest/v1/rpc/availability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_ci:ci,p_co:co})})
+   .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+   .then(function(rows){ if($('f-ci').value+'|'+$('f-co').value!==key) return; var m={}; (rows||[]).forEach(function(x){ m[x.room_type]=x.free; }); rpcFree=m; rpcKey=key; renderTypes(); })
+   .catch(function(){});
+}
+function holdFirst(type,ci,co){
+  if(!ENGINE) return Promise.resolve(null);
+  return api('/rest/v1/rpc/hold_room',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_type:type,p_ci:ci,p_co:co})})
+   .then(function(r){
+      if(r.ok) return r.json().then(function(id){ id=String(id||''); return /^[0-9a-f-]{36}$/i.test(id)?{id:id}:null; });
+      return r.text().then(function(tx){ return /sold_out/.test(tx)?{sold:true}:null; });
+   })
+   .catch(function(){ return null; });
+}
+function releaseHold(id){ try{ api('/rest/v1/rpc/release_hold',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_id:id})}).catch(function(){}); }catch(e){} }
+$('f-ci').addEventListener('change',fetchAvail);
+$('f-co').addEventListener('change',fetchAvail);
+$('f-type').addEventListener('change',renderQuote);
+$('f-view').addEventListener('change',renderQuote);
+$('f-cur').addEventListener('change',function(){ CUR=this.value; try{ localStorage.setItem('hms_form_cur',CUR); }catch(e){} renderTypes(); });
+
+/* ───────── extra guests ───────── */
+$('addG').onclick=function(){
+  var box=$('extra'); if(box.children.length>=9) return;
+  var row=document.createElement('div'); row.className='gx';
+  var n=document.createElement('input'); n.setAttribute('data-gn','1'); n.maxLength=120; n.placeholder=t('gName');
+  var p=document.createElement('input'); p.setAttribute('data-gp','1'); p.type='tel'; p.maxLength=40; p.placeholder=t('gPhone');
+  var x=document.createElement('button'); x.type='button'; x.className='x'; x.textContent='✕'; x.onclick=function(){ row.remove(); };
+  row.appendChild(n); row.appendChild(p); row.appendChild(x); box.appendChild(row);
 };
 
-async function loadAvailableRooms(){
-  const ci = document.getElementById('f-ci').value;
-  const co = document.getElementById('f-co').value;
-  const picker = document.getElementById('roomPicker');
-  document.getElementById('f-room').value = '';
-  document.getElementById('f-room-type').value = '';
-
-  if(!ci || !co || new Date(co) <= new Date(ci)){
-    picker.innerHTML = 'حدد تاريخ الوصول والمغادرة الأول لعرض الغرف المتاحة<span class="en" style="display:block;margin-top:4px;">Pick check-in &amp; check-out dates first to see available rooms</span>';
-    return;
-  }
-
-  picker.innerHTML = '⏳ جاري تحميل الغرف المتاحة...<span class="en" style="display:block;margin-top:4px;">Loading available rooms...</span>';
-
-  try{
-    const [catRes, bkRes] = await Promise.all([
-      fetch(SUPABASE_URL+'/rest/v1/rooms_catalog?select=*', { headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY } }),
-      fetch(SUPABASE_URL+'/rest/v1/bookings_sync?select=*&ci=lt.'+co+'&co=gt.'+ci+'&status=not.in.(Cancelled,Standby)', { headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY } })
-    ]);
-    if(!catRes.ok || !bkRes.ok) throw new Error('HTTP '+catRes.status+'/'+bkRes.status);
-    const catalog = await catRes.json();
-    const occupied = await bkRes.json();
-    const occupiedRooms = new Set(occupied.map(b=>String(b.room)));
-    const available = catalog.filter(r=>!occupiedRooms.has(String(r.room)))
-      .sort((a,b)=>String(a.room).localeCompare(String(b.room),undefined,{numeric:true}));
-
-    if(!available.length){
-      picker.innerHTML = '😔 لا توجد غرف متاحة في هذه التواريخ، جرب تواريخ تانية<span class="en" style="display:block;margin-top:4px;">No rooms available for these dates — try different dates</span>';
-      return;
-    }
-
-    picker.innerHTML = '';
-    available.forEach(r=>{
-      const card = document.createElement('div');
-      card.className = 'room-card';
-      card.innerHTML = '<div><div class="rc-name">غرفة '+r.room+' · Room '+r.room+'</div>'+
-        '<div class="rc-type">'+(roomTypeAr[r.type]||r.type)+' · '+(r.capacity||2)+' أفراد / guests</div></div>'+
-        '<div class="rc-check"></div>';
-      card.addEventListener('click', ()=>{
-        document.querySelectorAll('.room-card').forEach(c=>c.classList.remove('sel'));
-        card.classList.add('sel');
-        document.getElementById('f-room').value = r.room;
-        document.getElementById('f-room-type').value = r.type;
-      });
-      picker.appendChild(card);
-    });
-  }catch(e){
-    picker.innerHTML = '⚠️ تعذر تحميل الغرف المتاحة، حاول تاني<span class="en" style="display:block;margin-top:4px;">Could not load available rooms, please try again</span>';
-  }
-}
-
-function showErr(msg){
-  const box = document.getElementById('errBox');
-  box.innerHTML = msg;
-  box.style.display = 'block';
-}
-function hideErr(){
-  document.getElementById('errBox').style.display = 'none';
-}
-
-// ── Extra guest names (optional) ──
-document.getElementById('addGuestBtn').addEventListener('click', addExtraGuestField);
-function addExtraGuestField(){
-  const wrap = document.getElementById('extraGuestsWrap');
-  const row = document.createElement('div');
-  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:11px;padding:10px;';
-  const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.className = 'extra-guest-name';
-  inp.placeholder = 'اسم الضيف / Guest name';
-  inp.style.flex = '1 1 100%';
-  const phoneInp = document.createElement('input');
-  phoneInp.type = 'tel';
-  phoneInp.className = 'extra-guest-phone';
-  phoneInp.placeholder = 'رقم واتساب (اختياري) / WhatsApp (optional)';
-  phoneInp.style.flex = '1 1 55%';
-  const dobInp = document.createElement('input');
-  dobInp.type = 'date';
-  dobInp.className = 'extra-guest-dob';
-  dobInp.title = 'تاريخ الميلاد (اختياري) / Date of birth (optional)';
-  dobInp.style.flex = '1 1 120px';
-  const rm = document.createElement('button');
-  rm.type = 'button';
-  rm.textContent = '✕';
-  rm.title = 'حذف';
-  rm.style.cssText = 'background:rgba(224,104,94,0.12);border:1px solid rgba(224,104,94,0.4);color:var(--err);border-radius:10px;padding:0 14px;cursor:pointer;font-size:14px;align-self:flex-start;';
-  rm.addEventListener('click', ()=>row.remove());
-  row.appendChild(inp);
-  row.appendChild(phoneInp);
-  row.appendChild(dobInp);
-  row.appendChild(rm);
-  wrap.appendChild(row);
-  inp.focus();
-}
-function getExtraGuestRows(){
-  // Keep name/phone/dob paired by row so an empty name doesn't shift a later guest's data out of sync
-  return Array.from(document.querySelectorAll('#extraGuestsWrap > div')).map(row=>{
-    const nameEl = row.querySelector('.extra-guest-name');
-    const phoneEl = row.querySelector('.extra-guest-phone');
-    const dobEl = row.querySelector('.extra-guest-dob');
-    return { name: nameEl ? nameEl.value.trim() : '', phone: phoneEl ? phoneEl.value.trim() : '', dob: dobEl ? dobEl.value : '' };
-  }).filter(g=>g.name);
-}
-function getExtraGuestNames(){ return getExtraGuestRows().map(g=>g.name); }
-function getExtraGuestDobs(){ return getExtraGuestRows().map(g=>g.dob||''); }
-function getExtraGuestPhones(){ return getExtraGuestRows().map(g=>g.phone||''); }
-
-
-document.getElementById('reqForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  hideErr();
-
-  const name = document.getElementById('f-name').value.trim();
-  const phone = document.getElementById('f-phone').value.trim();
-  const ci = document.getElementById('f-ci').value;
-  const co = document.getElementById('f-co').value;
-  const room = document.getElementById('f-room').value;
-  const roomType = document.getElementById('f-room-type').value;
-
-  if(!name || !phone || !ci || !co){
-    showErr('من فضلك املأ كل الحقول المطلوبة (*)<br><span style="opacity:.85">Please fill in all required fields (*)</span>');
-    return;
-  }
-  if(new Date(co) <= new Date(ci)){
-    showErr('تاريخ المغادرة لازم يكون بعد تاريخ الوصول<br><span style="opacity:.85">Check-out must be after check-in</span>');
-    return;
-  }
-  if(!room){
-    showErr('من فضلك اختار غرفة من القائمة<br><span style="opacity:.85">Please select a room from the list</span>');
-    return;
-  }
-
-  const policyAgreed = document.getElementById('f-policyAgree').checked;
-  if(!policyAgreed){
-    showErr('من فضلك وافق على سياسة الحجز والإلغاء<br><span style="opacity:.85">Please agree to the booking & cancellation policy</span>');
-    return;
-  }
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = 'جاري الإرسال...<span class="en">Sending...</span>';
-
-  const notes = document.getElementById('f-notes').value.trim();
-
-  const newReqId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : null;
-  const payload = {
-    ...(newReqId ? {id:newReqId} : {}),
-    name, phone, ci, co,
-    room, room_type: roomType,
-    adults: parseInt(document.getElementById('f-adults').value)||1,
-    children: parseInt(document.getElementById('f-children').value)||0,
-    notes,
-    dob: document.getElementById('f-dob').value || null,
-    guest_names: getExtraGuestNames(),
-    guest_dobs: getExtraGuestDobs(),
-    guest_phones: getExtraGuestPhones(),
-  };
-
-  try{
-    const headers = {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    };
-    let res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', {
-      method:'POST', headers, body: JSON.stringify(payload)
-    });
-    if(!res.ok){
-      let bodyText = await res.text();
-      // Older Supabase tables may not have the guest_names/dob/guest_dobs columns yet — retry
-      // safely by folding whichever fields are missing into notes instead of failing the submission.
-      let fallback = {...payload};
-      let changed = false;
-      if(fallback.guest_names && fallback.guest_names.length && /guest_names/i.test(bodyText)){
-        fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'الضيوف الإضافيين / Other guests: ' + fallback.guest_names.join('، ');
-        delete fallback.guest_names;
-        delete fallback.guest_dobs; // dobs/phones are paired with names — no names column means no point sending them
-        delete fallback.guest_phones;
-        changed = true;
-      }
-      if(fallback.guest_dobs && /guest_dobs/i.test(bodyText)){
-        delete fallback.guest_dobs;
-        changed = true;
-      }
-      if(fallback.guest_phones && /guest_phones/i.test(bodyText)){
-        delete fallback.guest_phones;
-        changed = true;
-      }
-      if(fallback.dob && /(?<!guest_)dob/i.test(bodyText)){
-        fallback.notes = (fallback.notes ? fallback.notes+'\n' : '') + 'تاريخ ميلاد الضيف الرئيسي / Main guest DOB: ' + fallback.dob;
-        delete fallback.dob;
-        changed = true;
-      }
-      if(changed){
-        res = await fetch(SUPABASE_URL + '/rest/v1/booking_requests', { method:'POST', headers, body: JSON.stringify(fallback) });
-      }
-      if(!res.ok){
-        const bodyText2 = await res.text();
-        throw new Error('HTTP ' + res.status + ' — ' + bodyText2);
-      }
-    }
-    _currentReqId = newReqId;
-    if(_currentReqId) localStorage.setItem('dtaLastReqId', _currentReqId);
-
-    document.getElementById('reqForm').style.display = 'none';
-    document.getElementById('successBox').style.display = 'block';
-  }catch(err){
-    showErr('حصل خطأ أثناء الإرسال (تفاصيل للتشخيص):<br><span style="opacity:.85;word-break:break-all;">' + (err.message||err) + '</span>');
-    btn.disabled = false;
-    btn.innerHTML = 'إرسال الطلب<span class="en">Send Request</span>';
-  }
+/* ───────── submit ───────── */
+$('view-form').addEventListener('submit',function(ev){
+  ev.preventDefault();
+  var err=function(m){ $('ferr').textContent=m||''; return false; };
+  err('');
+  if($('f-web').value) return;                                   // honeypot
+  if(!$('f-consent').checked) return err('من فضلك وافق على سياسة الخصوصية · Please accept the privacy policy');
+  var name=$('f-name').value.trim(), phone=$('f-phone').value.trim(), ci=$('f-ci').value, co=$('f-co').value, type=$('f-type').value;
+  var adults=parseInt($('f-adults').value,10)||1, children=parseInt($('f-children').value,10)||0;
+  if(!name) return err(t('eName'));
+  if(phone.replace(/\D/g,'').length<7) return err(t('ePhone'));
+  if(!ci||!co) return err(t('eDate'));
+  if(ci<iso(new Date())) return err(t('ePast'));
+  if(co<=ci) return err(t('eOrder'));
+  if(!type) return err(t('eType'));
+  var by=freeRoomsByType(rooms,books,ci,co);
+  if(!by[type]||by[type].free<=0) return err(t('eFull'));
+  if(by[type].cap && adults+children>by[type].cap) return err(t('eCap'));
+  var sc=stayCheck(type,ci,co); if(sc) return err(sc);
+  var view=$('f-view')?$('f-view').value:'';
+  if(view){ var bv=freeRoomsByView(rooms,books,ci,co,type); if(!bv[view]||bv[view].free<=0) return err(t('eFull')); }
+  var noteTxt=$('f-notes').value.trim();
+  if(view&&VN[view]) noteTxt='الإطلالة المطلوبة / Requested view: '+VN[view].ar+' / '+VN[view].en+(noteTxt?'\n'+noteTxt:'');
+  try{ var last=+localStorage.getItem('hms_form_last')||0; if(Date.now()-last<60000) return err(t('eWait')); }catch(e){}
+  var gn=[],gp=[];
+  document.querySelectorAll('#extra .gx').forEach(function(r){ var a=r.querySelector('[data-gn]').value.trim(), b=r.querySelector('[data-gp]').value.trim(); if(a){ gn.push(a); gp.push(b); } });
+  var dob=$('f-dob').value||null;
+  var body={name:name,phone:phone,dob:dob,ci:ci,co:co,room_type:type,adults:Math.max(1,Math.min(20,adults)),children:Math.max(0,Math.min(20,children)),notes:noteTxt||null,
+            guest_names:gn.length?gn:null,guest_dobs:gn.length?gn.map(function(){return '';}):null,guest_phones:gn.length?gp:null};
+  var btn=$('send'); btn.disabled=true; btn.textContent=t('sending');
+  var qn=quoteNow(); if(ENGINE&&qn){ body.quoted_total=Math.round(qn.total*100)/100; body.quoted_currency=qn.code; }
+  holdFirst(type,ci,co).then(function(h){
+      if(h&&h.sold) throw 'SOLD';
+      if(h&&h.id) body.hold_id=h.id;
+      return api('/rest/v1/booking_requests',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(body)});
+   })
+   .then(function(r){ if(!r.ok){ if(body.hold_id) releaseHold(body.hold_id); throw new Error('HTTP '+r.status); }
+      try{ localStorage.setItem('hms_form_last',String(Date.now())); }catch(e){}
+      if(CFG.w){ var a=$('d-wa'); a.hidden=false; a.textContent='💬 '+t('wa'); a.href='https://wa.me/'+CFG.w+'?text='+encodeURIComponent((L==='ar'?'أهلاً، أنا ':'Hello, I am ')+name+(L==='ar'?' وبعتّ طلب حجز من '+ci+' إلى '+co:' and I sent a booking request for '+ci+' to '+co)); }
+      if(CFG.cx){ if(CFG.cx.t){ var tg=$('d-tg'); tg.hidden=false; tg.textContent='\u2708\uFE0F Telegram'; tg.href='https://t.me/'+(CFG.cx.t.charAt(0)==='@'?CFG.cx.t.slice(1):CFG.cx.t); } if(CFG.cx.v){ var vb=$('d-vb'); vb.hidden=false; vb.textContent='\U0001F4DE Viber'; vb.href='viber://chat?number=%2B'+CFG.cx.v; } }
+      show('view-done'); window.scrollTo(0,0); })
+   .catch(function(e){ btn.disabled=false; btn.textContent=t('send'); err(e==='SOLD'?t('eFull'):t('eSend')); if(e==='SOLD'){ rpcFree=null; fetchAvail(); } });
 });
 
-// ── CANCELLATION FLOW ──
-let _currentReqId = null;
+/* ───────── cancel mode ───────── */
+function cancelMode(){
+  show('view-cancel'); $('c-btn').hidden=true; $('c-info').textContent='…';
+  var id=String(CANCEL||'');
+  if(!/^[0-9a-f-]{32,40}$/i.test(id)){ $('c-info').textContent=t('cGone'); return; }
+  api('/rest/v1/rpc/get_request_for_cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_id:id})})
+   .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+   .then(function(rows){
+      var r=rows&&rows[0];
+      if(!r||r.status==='cancelled_by_guest'||r.status==='rejected'){ $('c-info').textContent=t('cGone'); return; }
+      $('c-info').textContent=r.name+'\n'+t('cNights')+' '+r.ci+' '+t('cTo')+' '+r.co;
+      $('c-btn').hidden=false;
+      $('c-btn').onclick=function(){
+        $('c-btn').disabled=true; $('c-err').textContent='';
+        api('/rest/v1/rpc/cancel_request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_id:id})})
+         .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+         .then(function(ok){ if(ok){ $('c-info').textContent=t('cDone'); $('c-btn').hidden=true; } else { $('c-info').textContent=t('cGone'); $('c-btn').hidden=true; } })
+         .catch(function(){ $('c-btn').disabled=false; $('c-err').textContent=t('cErr'); });
+      };
+   })
+   .catch(function(){ $('c-info').textContent=t('cErr'); });
+}
 
-document.getElementById('showCancelBtn').addEventListener('click', ()=>{
-  if(_currentReqId) openCancelScreen(_currentReqId);
-});
-
-// Supports opening a direct cancellation link: ...?cancel=<request-id>
-(function(){
-  const params = new URLSearchParams(window.location.search);
-  const cancelId = params.get('cancel');
-  if(cancelId){ openCancelScreen(cancelId); return; }
-
-  // If the guest closes the page and comes back later (no ?cancel= link at hand),
-  // let them reach cancellation using their last submitted request, saved locally.
-  const savedId = localStorage.getItem('dtaLastReqId');
-  if(savedId){
-    _currentReqId = savedId;
-    const link = document.createElement('button');
-    link.type = 'button';
-    link.className = 'cancel-link';
-    link.style.display = 'block';
-    link.style.margin = '0 auto 18px';
-    link.innerHTML = 'عندك طلب سابق؟ اضغط هنا لعرضه أو إلغاؤه<span class="en">Have a previous request? Tap to view or cancel it</span>';
-    link.addEventListener('click', ()=>openCancelScreen(savedId));
-    const wrap = document.querySelector('.wrap');
-    wrap.insertBefore(link, document.getElementById('reqForm'));
-  }
+/* ───────── boot ───────── */
+(function boot(){
+  if(!CFG){ applyLang(); fail(t('bad')); return; }
+  var today=iso(new Date()); $('f-ci').min=today; $('f-co').min=today;
+  applyLang();
+  if(CANCEL){ cancelMode(); return; }
+  Promise.all([
+    getJson('/rest/v1/rooms_catalog?select=room,type,capacity,view&order=room').catch(function(){ return getJson('/rest/v1/rooms_catalog?select=room,type,capacity&order=room'); }),
+    getJson('/rest/v1/bookings_sync?select=room,ci,co,status&co=gte.'+today),
+    getJson('/rest/v1/dta_site_settings?key=eq.booking_policy&select=title,body,fee_ar,fee_en,prepay_ar,prepay_en,notes').catch(function(){ return []; }),
+    getJson('/rest/v1/dta_site_settings?key=eq.stay_rules&select=body').catch(function(){ return []; }),
+    getJson('/rest/v1/public_rates?select=kind,key,usd,eur,loc').catch(function(){ return null; })
+  ]).then(function(res){
+    rooms=res[0]||[]; books=res[1]||[]; policy=(res[2]&&res[2][0])||null;
+    if(Array.isArray(res[4])){ ENGINE=true; res[4].forEach(function(x){ if(x&&(x.kind==='type'||x.kind==='view')) rates[x.kind][String(x.key)]={usd:+x.usd||0,eur:+x.eur||0,loc:+x.loc||0}; }); }
+    try{ var rb=res[3]&&res[3][0]&&res[3][0].body; if(rb){ var ro=JSON.parse(rb); if(ro&&typeof ro==='object') stayRules=ro; } }catch(e){}
+    showStayHint();
+    if(!rooms.length){ fail(t('noRooms')); return; }
+    show('view-form'); applyLang();
+  }).catch(function(){ fail(t('loadErr')); });
 })();
-
-function escHtml(v){ return String(v==null?'':v).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-async function openCancelScreen(id){
-  document.getElementById('reqForm').style.display = 'none';
-  document.getElementById('successBox').style.display = 'none';
-  const box = document.getElementById('cancelBox');
-  const content = document.getElementById('cancelContent');
-  box.style.display = 'block';
-  content.innerHTML = '⏳ جاري تحميل بيانات الطلب...<span class="en" style="display:block;margin-top:4px;">Loading your request...</span>';
-
-  try{
-    const res = await fetch(SUPABASE_URL+'/rest/v1/rpc/get_booking_request', {
-      method:'POST',
-      headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json' },
-      body: JSON.stringify({ p_id: String(id) })
-    });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const rows = await res.json();
-    if(!rows.length){
-      content.innerHTML = '⚠️ الطلب ده مش موجود أو الرابط غلط<br><span style="opacity:.85">This request could not be found</span>';
-      return;
-    }
-    const r = rows[0];
-    if(r.status === 'cancelled_by_guest' || r.status === 'rejected'){
-      content.innerHTML = '✅ الطلب ده اتلغى بالفعل<br><span style="opacity:.85">This request is already cancelled</span>';
-      return;
-    }
-    content.innerHTML =
-      '<div style="margin-bottom:16px;">'+
-        '<div style="font-weight:800;font-size:15px;margin-bottom:6px;">'+escHtml(r.name)+'</div>'+
-        '<div style="font-size:13px;color:var(--muted);">📅 '+r.ci+' → '+r.co+'</div>'+
-        (r.room?'<div style="font-size:13px;color:var(--muted);">🛏️ غرفة '+escHtml(r.room)+'</div>':'')+
-      '</div>'+
-      '<div style="font-size:13px;color:var(--err);margin-bottom:16px;">متأكد إنك عايز تلغي الطلب/الحجز ده؟<span class="en" style="display:block;margin-top:4px;">Are you sure you want to cancel this request/booking?</span></div>'+
-      '<button class="submit" id="confirmCancelBtn" style="background:linear-gradient(135deg,#e0685e,#c0392b);color:#fff;">تأكيد الإلغاء<span class="en">Confirm Cancellation</span></button>';
-    document.getElementById('confirmCancelBtn').addEventListener('click', ()=>doCancel(r));
-  }catch(e){
-    content.innerHTML = '⚠️ حصل خطأ، حاول تاني<br><span style="opacity:.85">Something went wrong, please try again</span>';
-  }
-}
-
-async function doCancel(r){
-  const content = document.getElementById('cancelContent');
-  content.innerHTML = '⏳ جاري الإلغاء...<span class="en" style="display:block;margin-top:4px;">Cancelling...</span>';
-  try{
-    const cres = await fetch(SUPABASE_URL+'/rest/v1/rpc/cancel_booking_request', {
-      method:'POST',
-      headers:{ apikey:SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY, 'Content-Type':'application/json' },
-      body: JSON.stringify({ p_id: String(r.id) })
-    });
-    if(!cres.ok) throw new Error('HTTP '+cres.status);
-    content.innerHTML = '✅ تم إلغاء طلبك<br><span style="opacity:.85">Your request has been cancelled</span>';
-  }catch(e){
-    content.innerHTML = '⚠️ فشل الإلغاء، حاول تاني أو تواصل معانا واتساب<br><span style="opacity:.85">Cancellation failed, please try again or contact us on WhatsApp</span>';
-  }
-}
+})();
 </script>
 </body>
 </html>
